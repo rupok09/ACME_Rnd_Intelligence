@@ -8,6 +8,8 @@ st.set_page_config(
 )
 
 import traceback
+import sys
+from unittest.mock import MagicMock
 
 # Helper to safely create a module view with isolated error catching
 def safe_import_module(module_path, function_name):
@@ -21,13 +23,11 @@ def safe_import_module(module_path, function_name):
         # INTERCEPTOR: If it's a headless server libXrender issue, patch it inline
         if "libXrender.so.1" in error_msg:
             try:
-                import sys
-                from unittest.mock import MagicMock
-                # Mock out the graphics submodules so RDKit imports don't crash
+                # Mock out the graphics submodules so RDKit imports don't crash the engine
                 sys.modules['rdkit.Chem.Draw'] = MagicMock()
                 sys.modules['rdkit.Chem.Draw.rdMolDraw2D'] = MagicMock()
                 
-                # Retry loading the module with the mocked headless layers
+                # Invalidate internal caches and retry loading the module with the mocked headless layers
                 import importlib
                 importlib.invalidate_caches()
                 mod = importlib.import_module(module_path)
