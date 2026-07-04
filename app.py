@@ -12,12 +12,29 @@ import traceback
 # Helper to safely create a module view with isolated error catching
 def safe_import_module(module_path, function_name):
     try:
-        # Fixed: import the base module first, then extract the function properly
         import importlib
         mod = importlib.import_module(module_path)
         return getattr(mod, function_name)
     except Exception as e:
         error_msg = traceback.format_exc()
+        
+        # INTERCEPTOR: If it's a headless server libXrender issue, patch it inline
+        if "libXrender.so.1" in error_msg:
+            try:
+                import sys
+                from unittest.mock import MagicMock
+                # Mock out the graphics submodules so RDKit imports don't crash
+                sys.modules['rdkit.Chem.Draw'] = MagicMock()
+                sys.modules['rdkit.Chem.Draw.rdMolDraw2D'] = MagicMock()
+                
+                # Retry loading the module with the mocked headless layers
+                import importlib
+                importlib.invalidate_caches()
+                mod = importlib.import_module(module_path)
+                return getattr(mod, function_name)
+            except Exception as retry_error:
+                error_msg = traceback.format_exc()
+
         def fallback_view():
             st.error(f"❌ Failed to load module: `{module_path}`")
             with st.expander("🔍 View Technical Dependency & Compilation Logs", expanded=True):
