@@ -13,3 +13,5 @@ matplotlib
 google-generativeai
 python-dotenv
 pypdf2
+chembl-webresource-client
+chembl_webresource_client
