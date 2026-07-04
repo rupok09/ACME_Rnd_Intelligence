@@ -7,6 +7,22 @@ st.set_page_config(
     layout="wide"
 )
 
+import traceback
+
+# Helper to safely create a module view with isolated error catching
+def safe_import_module(module_path, function_name):
+    try:
+        mod = __import__(module_path, fromlist=[function_name])
+        return getattr(mod, function_name)
+    except Exception as e:
+        error_msg = traceback.format_exc()
+        def fallback_view():
+            st.error(f"❌ Failed to load module: `{module_path}`")
+            with st.expander("🔍 View Technical Dependency & Compilation Logs", expanded=True):
+                st.code(error_msg, language="python")
+        return fallback_view
+
+# Load global CSS parameters and navigation utils
 from styles.custom_css import load_css
 from utils.navigation import (
     init_navigation,
@@ -24,16 +40,16 @@ if "nav" in st.query_params:
     st.session_state.page = st.query_params["nav"]
     st.query_params.clear()
 
-# Load core system platform feature modules
-from modules.home import show_home
-from modules.literature_intelligence import show_literature_intelligence
-from modules.api_characterization import show_api_characterization
-from modules.rld_information import show_rld_information
-from modules.drug_excipient_compatibility import show_drug_excipient_compatibility
-from modules.pharmacokinetics import show_pharmacokinetics
-from modules.doe_optimization import show_doe_optimization
-from modules.ai_assistant import show_ai_assistant
-from modules.login import show_login
+# Lazy-loaded safe feature module mappings
+show_home = safe_import_module("modules.home", "show_home")
+show_literature_intelligence = safe_import_module("modules.literature_intelligence", "show_literature_intelligence")
+show_api_characterization = safe_import_module("modules.api_characterization", "show_api_characterization")
+show_rld_information = safe_import_module("modules.rld_information", "show_rld_information")
+show_drug_excipient_compatibility = safe_import_module("modules.drug_excipient_compatibility", "show_drug_excipient_compatibility")
+show_pharmacokinetics = safe_import_module("modules.pharmacokinetics", "show_pharmacokinetics")
+show_doe_optimization = safe_import_module("modules.doe_optimization", "show_doe_optimization")
+show_ai_assistant = safe_import_module("modules.ai_assistant", "show_ai_assistant")
+show_login = safe_import_module("modules.login", "show_login")
 
 
 # ================= TOP BAR =================
@@ -59,7 +75,12 @@ with st.sidebar:
     # 1. FIXED LOGO CORNER NODE: Side-by-side branding panel block
     logo_side_col, title_side_col = st.columns([1, 3])
     with logo_side_col:
-        st.image("assets/acme_logo.png", width=55)
+        # Fallback handling for logo image asset visualization
+        try:
+            st.image("assets/acme_logo.png", width=55)
+        except Exception:
+            st.markdown("### 🧪")
+            
     with title_side_col:
         st.markdown(
             """
