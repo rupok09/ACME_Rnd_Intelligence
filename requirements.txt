@@ -8,3 +8,6 @@ chembl-webresource-client
 beautifulsoup4
 pdfplumber
 rdkit
+numpy
+matplotlib
+google-generativeai
