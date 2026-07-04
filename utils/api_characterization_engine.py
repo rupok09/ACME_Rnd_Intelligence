@@ -1,3 +1,9 @@
+import os
+os.environ["RDK_BUILD_HEADLESS"] = "True"
+import matplotlib
+matplotlib.use("Agg")
+
+# Your existing imports continue below...
 from utils.api_properties import PROPERTY_GROUPS
 from utils.pubchem import search_pubchem_records
 from utils.chembl import search_chembl_records

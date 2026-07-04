@@ -1,3 +1,9 @@
+import os
+os.environ["RDK_BUILD_HEADLESS"] = "True"
+import matplotlib
+matplotlib.use("Agg")
+
+# Your existing imports continue below...
 import streamlit as st
 import google.generativeai as genai
 import json
