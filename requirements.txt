@@ -4,7 +4,6 @@ requests
 openpyxl
 pymupdf
 lxml
-chembl-webresource-client
 beautifulsoup4
 pdfplumber
 rdkit
@@ -12,6 +11,7 @@ numpy
 matplotlib
 google-generativeai
 python-dotenv
-pypdf2
 chembl-webresource-client
 chembl_webresource_client
+pypdf2
+PyPDF2
