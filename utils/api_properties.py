@@ -1,0 +1,36 @@
+PROPERTY_GROUPS = {
+    "Identity": [
+        "API Name",
+        "Structure",
+        "PubChem CID",
+        "ChEMBL ID",
+        "CAS Number",
+        "Molecular Formula",
+        "Molecular Weight",
+        "IUPAC Name",
+        "Canonical SMILES",
+        "InChI",
+    ],
+    "Physicochemical": [
+        "Physical Description",
+        "Melting Point",
+        "Solubility",
+        "Solubility vs pH",
+        "pKa",
+        "LogP / LogD",
+        "BCS Classification",
+    ],
+    "Solid State": [
+        "Solid-state Form / Polymorph",
+        "Hygroscopicity",
+        "Bulk Density",
+        "Tapped Density",
+        "Flowability",
+    ],
+    "Stability": [
+        "Photostability",
+        "Chemical Stability - Solid State",
+        "Chemical Stability - Solution",
+        "Forced Degradation Data",
+    ],
+}

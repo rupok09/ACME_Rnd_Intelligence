@@ -1,0 +1,146 @@
+{
+  "microcrystalline cellulose": {
+    "Function": "Diluent / Dry binder",
+    "Category": "Filler",
+    "Typical Range": "10–60%",
+    "Notes": "Good compressibility; commonly used in direct compression tablets."
+  },
+  "mcc": {
+    "Function": "Diluent / Dry binder",
+    "Category": "Filler",
+    "Typical Range": "10–60%",
+    "Notes": "Abbreviation of microcrystalline cellulose."
+  },
+  "lactose": {
+    "Function": "Diluent",
+    "Category": "Filler",
+    "Typical Range": "20–80%",
+    "Notes": "Common filler; check Maillard reaction risk with amine APIs."
+  },
+  "mannitol": {
+    "Function": "Diluent",
+    "Category": "Filler",
+    "Typical Range": "10–90%",
+    "Notes": "Useful for chewable/ODT formulations; non-hygroscopic."
+  },
+  "crospovidone": {
+    "Function": "Superdisintegrant",
+    "Category": "Disintegrant",
+    "Typical Range": "2–5%",
+    "Notes": "Insoluble, rapid swelling; useful for immediate-release tablets."
+  },
+  "croscarmellose sodium": {
+    "Function": "Superdisintegrant",
+    "Category": "Disintegrant",
+    "Typical Range": "0.5–5%",
+    "Notes": "Commonly used in IR tablets."
+  },
+  "sodium starch glycolate": {
+    "Function": "Superdisintegrant",
+    "Category": "Disintegrant",
+    "Typical Range": "2–8%",
+    "Notes": "Swelling disintegrant; excessive amount may slow dissolution."
+  },
+  "hydroxypropyl cellulose": {
+    "Function": "Binder",
+    "Category": "Binder",
+    "Typical Range": "2–10%",
+    "Notes": "Used in wet granulation and film coating."
+  },
+  "low substituted hydroxypropyl cellulose": {
+    "Function": "Disintegrant / Binder",
+    "Category": "Cellulose derivative",
+    "Typical Range": "2–20%",
+    "Notes": "Used in tablets as a disintegrant, binder, and compression aid."
+  },
+  "low substituted hpc": {
+    "Function": "Disintegrant / Binder",
+    "Category": "Cellulose derivative",
+    "Typical Range": "2–20%",
+    "Notes": "Low-substituted hydroxypropyl cellulose is commonly used as a disintegrant and binder."
+  },
+  "hypromellose": {
+    "Function": "Binder / Film former / Matrix former",
+    "Category": "Polymer",
+    "Typical Range": "2–30%",
+    "Notes": "Used in coating and modified-release matrix tablets."
+  },
+  "hpmc": {
+    "Function": "Binder / Film former / Matrix former",
+    "Category": "Polymer",
+    "Typical Range": "2–30%",
+    "Notes": "Abbreviation of hypromellose."
+  },
+  "magnesium stearate": {
+    "Function": "Lubricant",
+    "Category": "Lubricant",
+    "Typical Range": "0.25–2%",
+    "Notes": "Over-lubrication may reduce dissolution and tablet hardness."
+  },
+  "sodium stearyl fumarate": {
+    "Function": "Lubricant",
+    "Category": "Lubricant",
+    "Typical Range": "0.5–2%",
+    "Notes": "Alternative lubricant with lower hydrophobicity than magnesium stearate."
+  },
+  "colloidal silicon dioxide": {
+    "Function": "Glidant",
+    "Category": "Flow aid",
+    "Typical Range": "0.1–1%",
+    "Notes": "Improves powder flow."
+  },
+  "silicon dioxide": {
+    "Function": "Glidant",
+    "Category": "Flow aid",
+    "Typical Range": "0.1–1%",
+    "Notes": "Improves powder flow."
+  },
+  "talc": {
+    "Function": "Glidant / Anti-adherent",
+    "Category": "Flow aid",
+    "Typical Range": "1–5%",
+    "Notes": "Used in tablets and coating systems."
+  },
+  "polyethylene glycol": {
+    "Function": "Plasticizer / Solubilizer",
+    "Category": "Coating excipient / Solubilizer",
+    "Typical Range": "1–10%",
+    "Notes": "Used as plasticizer in film coating; may improve wettability or solubilization."
+  },
+  "peg": {
+    "Function": "Plasticizer / Solubilizer",
+    "Category": "Coating excipient / Solubilizer",
+    "Typical Range": "1–10%",
+    "Notes": "PEG is commonly used as a plasticizer in film coating and may improve wettability or solubilization."
+  },
+  "titanium dioxide": {
+    "Function": "Opacifier",
+    "Category": "Colorant / Coating",
+    "Typical Range": "As required",
+    "Notes": "Used in film coating."
+  },
+  "glyceryl behenate": {
+    "Function": "Lubricant / Matrix former",
+    "Category": "Lipid excipient",
+    "Typical Range": "1–10%",
+    "Notes": "Used as lubricant, release modifier, or lipid matrix former."
+  },
+  "hydrogenated castor oil": {
+    "Function": "Lubricant / Release modifier",
+    "Category": "Lipid excipient",
+    "Typical Range": "0.5–5%",
+    "Notes": "Used as lubricant and hydrophobic matrix/release modifying excipient."
+  },
+  "opadry": {
+    "Function": "Film coating system",
+    "Category": "Coating excipient",
+    "Typical Range": "As required",
+    "Notes": "Commercial ready-mix film coating system."
+  },
+  "pregelatinized starch": {
+    "Function": "Diluent / Binder / Disintegrant",
+    "Category": "Starch-based excipient",
+    "Typical Range": "5–20%",
+    "Notes": "Used as filler, binder, and disintegrant in tablet formulations."
+  }
+}

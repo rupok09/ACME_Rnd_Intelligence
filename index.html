@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulation Risk Predictor</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo-space"></div>
+        <nav><a href="#" class="active">⚗️ PREDICT</a></nav>
+    </header>
+
+    <div class="sub-header">
+        <h1 class="page-title">Analysis Result</h1>
+        <span class="breadcrumb">Formulation Risk</span>
+    </div>
+
+    <main class="container">
+        <!-- Input Selector Card -->
+        <div class="card">
+            <h2>Input a formulation</h2>
+            <hr class="divider">
+
+            <div class="form-group">
+                <label for="smiles">DRUG SMILES STRINGS:</label>
+                <input type="text" id="smiles" value="CCOC(=O)C1=C(NC(=C(C1C2=CC=CC=C2Cl)C(=O)OC)C)COCCN">
+            </div>
+
+            <div class="form-group">
+                <label for="excipient">CHOOSE AN EXCIPIENT:</label>
+                <select id="excipient">
+                    <option value="Acacia">Acacia</option>
+                    <option value="Butylated Hydroxytoluene">Butylated Hydroxytoluene</option>
+                    <option value="Sodium Lauryl Sulfate">Sodium Lauryl Sulfate</option>
+                    <option value="Sodium Metabisulfite">Sodium Metabisulfite</option>
+                    <option value="Sodium Phosphate, Dibasic">Sodium Phosphate, Dibasic</option>
+                    <option value="Sodium Stearate">Sodium Stearate</option>
+                    <option value="Sodium Stearyl Fumarate">Sodium Stearyl Fumarate</option>
+                    <option value="Docusate Sodium">Docusate Sodium</option>
+                    <option value="Sorbitol">Sorbitol</option>
+                    <option value="Soybean Oil">Soybean Oil</option>
+                    <option value="Starch">Starch</option>
+                    <option value="Calcium Alginate">Calcium Alginate</option>
+                    <option value="Sodium Benzoate">Sodium Benzoate</option>
+                    <option value="Stearic Acid">Stearic Acid</option>
+                    <option value="Stearyl Alcohol">Stearyl Alcohol</option>
+                    <option value="Succinic Acid">Succinic Acid</option>
+                    <option value="Sucrose">Sucrose</option>
+                    <option value="Talc">Talc</option>
+                    <option value="Tartaric Acid">Tartaric Acid</option>
+                    <option value="Thimerosal">Thimerosal</option>
+                    <option value="Thymol">Thymol</option>
+                    <option value="Titanium Dioxide">Titanium Dioxide</option>
+                    <option value="Calcium Carbonate">Calcium Carbonate</option>
+                    <option value="Tragacanth">Tragacanth</option>
+                    <option value="Vanillin">Vanillin</option>
+                    <option value="Vitamin E Polyethylene Glycol Succinate">Vitamin E Polyethylene Glycol Succinate</option>
+                    <option value="Wax, Anionic Emulsifying">Wax, Anionic Emulsifying</option>
+                    <option value="Wax, Nonionic Emulsifying">Wax, Nonionic Emulsifying</option>
+                    <option value="Xanthan Gum">Xanthan Gum</option>
+                    <option value="Xylitol">Xylitol</option>
+                    <option value="Calcium Disodiumedetate">Calcium Disodiumedetate</option>
+                    <option value="Zinc Stearate">Zinc Stearate</option>
+                    <option value="Calcium Oxide">Calcium Oxide</option>
+                    <option value="Calcium Phosphate">Calcium Phosphate</option>
+                    <option value="Calcium Phosphate, Dibasic Anhydrous">Calcium Phosphate, Dibasic Anhydrous</option>
+                    <option value="Calcium Phosphate, Dibasic Dihydrate">Calcium Phosphate, Dibasic Dihydrate</option>
+                    <option value="Calcium Stearate">Calcium Stearate</option>
+                    <option value="Calcium Sulfate">Calcium Sulfate</option>
+                    <option value="Lanolin">Lanolin</option>
+                    <option value="Carbomer">Carbomer</option>
+                    <option value="Sodium Starch Glycolate">Sodium Starch Glycolate</option>
+                    <option value="Cellulose">Cellulose</option>
+                    <option value="Cellulose Acetate">Cellulose Acetate</option>
+                    <option value="Cetostearyl Alcohol">Cetostearyl Alcohol</option>
+                    <option value="Cetyl Alcohol">Cetyl Alcohol</option>
+                    <option value="Chitosan">Chitosan</option>
+                    <option value="Chlorocresol">Chlorocresol</option>
+                    <option value="Cholesterol">Cholesterol</option>
+                    <option value="Citric Acid">Citric Acid</option>
+                    <option value="Croscarmellose Sodium">Croscarmellose Sodium</option>
+                    <option value="Boric acid">Boric acid</option>
+                    <option value="Cyclodextrin">Cyclodextrin</option>
+                    <option value="Dextrose">Dextrose</option>
+                    <option value="Edetate Disodium">Edetate Disodium</option>
+                    <option value="Ethylcellulose">Ethylcellulose</option>
+                    <option value="Ascorbic Acid">Ascorbic Acid</option>
+                    <option value="Gelatin">Gelatin</option>
+                    <option value="Glucose">Glucose</option>
+                    <option value="Glyceryl Monostearate">Glyceryl Monostearate</option>
+                    <option value="Glyceryl Palmitostearate">Glyceryl Palmitostearate</option>
+                    <option value="Hard Fat">Hard Fat</option>
+                    <option value="HPMCAS">HPMCAS</option>
+                    <option value="Hydroxyethyl Cellulose">Hydroxyethyl Cellulose</option>
+                    <option value="Hydroxypropyl Cellulose">Hydroxypropyl Cellulose</option>
+                    <option value="HPMC">HPMC</option>
+                    <option value="Hypromellose Phthalate">Hypromellose Phthalate</option>
+                    <option value="Aspartame">Aspartame</option>
+                    <option value="Kaolin">Kaolin</option>
+                    <option value="Lactitol">Lactitol</option>
+                    <option value="Lactose">Lactose</option>
+                    <option value="Dimethicone">Dimethicone</option>
+                    <option value="Monobasic sodium phosphate">Monobasic sodium phosphate</option>
+                    <option value="Magnesium Aluminum Silicate">Magnesium Aluminum Silicate</option>
+                    <option value="Magnesium Carbonate">Magnesium Carbonate</option>
+                    <option value="Magnesium Hydroxide">Magnesium Hydroxide</option>
+                    <option value="Magnesium Oxide">Magnesium Oxide</option>
+                    <option value="Magnesium Silicate">Magnesium Silicate</option>
+                    <option value="Attapulgite">Attapulgite</option>
+                    <option value="Magnesium Stearate">Magnesium Stearate</option>
+                    <option value="Magnesium Trisilicate">Magnesium Trisilicate</option>
+                    <option value="Maltose">Maltose</option>
+                    <option value="Mannitol">Mannitol</option>
+                    <option value="Meglumine">Meglumine</option>
+                    <option value="Menthol">Menthol</option>
+                    <option value="Calcium Citrate">Calcium Citrate</option>
+                    <option value="Methylcellulose">Methylcellulose</option>
+                    <option value="Methylparaben">Methylparaben</option>
+                    <option value="Microcrystalline Cellulose">Microcrystalline Cellulose</option>
+                    <option value="Bentonite">Bentonite</option>
+                    <option value="Propylene Glycol">Propylene Glycol</option>
+                    <option value="Palmitic Acid">Palmitic Acid</option>
+                    <option value="Cresol">Cresol</option>
+                    <option value="PEG">PEG</option>
+                    <option value="Phenol">Phenol</option>
+                    <option value="Phenylmercuric Acetate">Phenylmercuric Acetate</option>
+                    <option value="Polacrilin Potassium">Polacrilin Potassium</option>
+                    <option value="Polymethacrylate">Polymethacrylate</option>
+                    <option value="Polyoxyethylene Alkyl Ethers">Polyoxyethylene Alkyl Ethers</option>
+                    <option value="Polyoxyethylene Stearates">Polyoxyethylene Stearates</option>
+                    <option value="Benzalkonium Chloride">Benzalkonium Chloride</option>
+                    <option value="Dextrates">Dextrates</option>
+                    <option value="Polyoxyethylene Sorbitan Fatty Acid Esters (Polysorbate 20; Polysorbate 40; Polysorbate 60; Polysorbate 80)">Polyoxyethylene Sorbitan Fatty Acid Esters (Polysorbate 20; Polysorbate 40; Polysorbate 60; Polysorbate 80)</option>
+                    <option value="Polyvinyl Acetate Phthalate">Polyvinyl Acetate Phthalate</option>
+                    <option value="Potassium Carbonate">Potassium Carbonate</option>
+                    <option value="Potassium Metabisulfite">Potassium Metabisulfite</option>
+                    <option value="Propylparaben">Propylparaben</option>
+                    <option value="Propylparaben Sodium">Propylparaben Sodium</option>
+                    <option value="PVP">PVP</option>
+                    <option value="PVPP">PVPP</option>
+                    <option value="Shellac">Shellac</option>
+                    <option value="Butylated Hydroxyanisole">Butylated Hydroxyanisole</option>
+                    <option value="Silicon Dioxide">Silicon Dioxide</option>
+                    <option value="Sodium Ascorbate">Sodium Ascorbate</option>
+                    <option value="Sodium Bicarbonate">Sodium Bicarbonate</option>
+                    <option value="Sodium Bisulfite">Sodium Bisulfite</option>
+                    <option value="Sodium Carbonate">Sodium Carbonate</option>
+                    <option value="Sodium Carboxymethylcellulose">Sodium Carboxymethylcellulose</option>
+                    <option value="Sodium Chloride">Sodium Chloride</option>
+                    <option value="Sodium Citrate Dihydrate">Sodium Citrate Dihydrate</option>
+                    <option value="Potassium Sorbate">Potassium Sorbate</option>
+                    <option value="Disodium Edetate">Disodium Edetate</option>
+                </select>
+            </div>
+
+            <button id="go-btn" class="btn-go">GO!</button>
+            <!-- Preset buttons section from image_86bc49.png has been removed from this block -->
+        </div>
+
+        <!-- Output Metric Dashboard Panels -->
+        <div id="output-wrapper" class="hidden">
+            <div class="tabs-container">
+                <button class="tab-btn active" onclick="switchTab('formulation')">Formulation Info</button>
+                <button class="tab-btn" onclick="switchTab('evidence')">Identified Evidence</button>
+                <button class="tab-btn" onclick="switchTab('rules')">Rule-Based Evidence</button>
+            </div>
+
+            <div class="tab-content-box">
+                <div id="tab-formulation" class="tab-pane">
+                    <div class="profile-grid">
+                        <div class="profile-card">
+                            <h3>Drug Profile</h3>
+                            <div class="flex-row">
+                                <div class="img-frame">
+                                    <img id="drug-img" src="" alt="Structure">
+                                </div>
+                                <div class="details-list">
+                                    <div><strong>Name:</strong> <span id="d-name"></span></div>
+                                    <div><strong>ChEMBL ID:</strong> <span id="d-chembl"></span></div>
+                                    <div><strong>Formula:</strong> <span id="d-formula"></span></div>
+                                    <div><strong>MW:</strong> <span id="d-mw"></span> g/mol</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="profile-card">
+                            <h3>Excipient Profile</h3>
+                            <div class="details-list">
+                                <div><strong>Excipient:</strong> <span id="e-name"></span></div>
+                                <div><strong>CAS:</strong> <span id="e-cas"></span></div>
+                                <div><strong>Formula:</strong> <span id="e-formula"></span></div>
+                                <div><strong>Category:</strong> <span id="e-cat" style="color:#0fbb9c;"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="risk-banner">
+                        <div>Identified Risk: <span id="risk-ident" class="badge"></span></div>
+                        <div>Rule-based Risk: <span id="risk-rule" class="badge"></span></div>
+                    </div>
+                </div>
+
+                <div id="tab-evidence" class="tab-pane hidden">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Study Type</th><th>Compatibility</th><th>Reference Source</th><th>Details</th></tr>
+                        </thead>
+                        <tbody id="evidence-rows"></tbody>
+                    </table>
+                </div>
+
+                <div id="tab-rules" class="tab-pane hidden">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Drug Group</th><th>Excipient Group</th><th>Reaction Type</th><th>Description</th></tr>
+                        </thead>
+                        <tbody id="rules-rows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/script.js"></script>
+</body>
+</html>

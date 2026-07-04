@@ -1,0 +1,10 @@
+streamlit
+pandas
+requests
+openpyxl
+pymupdf
+lxml
+chembl-webresource-client
+beautifulsoup4
+pdfplumber
+rdkit
