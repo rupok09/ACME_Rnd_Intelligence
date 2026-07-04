@@ -15,3 +15,4 @@ chembl-webresource-client
 chembl_webresource_client
 pypdf2
 PyPDF2
+scipy
