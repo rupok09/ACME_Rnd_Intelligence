@@ -12,7 +12,9 @@ import traceback
 # Helper to safely create a module view with isolated error catching
 def safe_import_module(module_path, function_name):
     try:
-        mod = __import__(module_path, fromlist=[function_name])
+        # Fixed: import the base module first, then extract the function properly
+        import importlib
+        mod = importlib.import_module(module_path)
         return getattr(mod, function_name)
     except Exception as e:
         error_msg = traceback.format_exc()
