@@ -11,3 +11,15 @@ rdkit
 numpy
 matplotlib
 google-generativeai
+python-dotenv
+
+streamlit
+numpy
+pandas
+matplotlib
+google-generativeai
+python-dotenv
+rdkit
+beautifulsoup4
+requests
+pypdf2
