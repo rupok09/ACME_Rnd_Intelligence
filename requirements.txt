@@ -16,3 +16,4 @@ chembl_webresource_client
 pypdf2
 PyPDF2
 scipy
+rdkit-pypi==2022.9.5
