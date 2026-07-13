@@ -91,7 +91,7 @@ def show_ai_assistant():
             <div class="assist-title">🤖 AI Assistant Command Center</div>
             <div class="assist-subtitle">
                 Centralized generative intelligence console. Troubleshoot stability issues, cross-analyze 
-                excipient properties, or draft formulation strategies directly with Gemini.
+                excipient properties, or draft formulation strategies directly.
             </div>
         </div>
         """, 
@@ -120,7 +120,6 @@ def show_ai_assistant():
                 
                 if st.button("Initialize Assistant Node", use_container_width=True, type="primary"):
                     token_clean = user_token.strip()
-                    # FIXED LOGIC: Accept both traditional AIzaSy strings and your direct AQ enterprise tokens
                     if token_clean.startswith("AIzaSy") or token_clean.startswith("AQ"):
                         st.session_state.gemini_api_key = token_clean
                         st.toast("Assistant link established!", icon="🤖")
@@ -150,94 +149,75 @@ def show_ai_assistant():
     # Initialize client engine configuration silently
     genai.configure(api_key=api_key)
 
-    # --------------------------------------------------------------------------
-    # ACTIVE INTERACTIVE CHAT GRAPHIC GRID
-    # --------------------------------------------------------------------------
-    panel_left, panel_right = st.columns([3, 1])
-
     # Gather background cross-module states dynamically to enrich assistant understanding
     active_literature = st.session_state.get("extracted_doc_text", "")
     active_api = st.session_state.get("active_api_profile", None)
 
-    with panel_right:
-        st.markdown("### ⚙ guide SYSTEM")
-        with st.container(border=True):
-            st.markdown("**Active Environment**")
-            st.code("gemini-2.5-flash", language="text")
-            
-            st.markdown("---")
-            st.markdown("**Cross-Module Memory Context**")
-            
-            if active_literature:
-                st.markdown("🟢 `Literature Sync Enabled`")
-            else:
-                st.markdown("⚪ `Literature Vault Vacant`")
-                
-            if active_api:
-                st.markdown(f"🟢 `API Target Sync: {active_api.get('name', 'Unknown')}`")
-            else:
-                st.markdown("⚪ `No Active API Selected`")
-            
-            st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
-            if st.button("Clear Chat History", use_container_width=True, type="secondary"):
-                st.session_state.chat_history_global = []
-                st.rerun()
-
-    with panel_left:
+    # --------------------------------------------------------------------------
+    # ACTIVE INTERACTIVE FULL-WIDTH CHAT GRID
+    # --------------------------------------------------------------------------
+    # Top Actions Row directly in the workspace content flow
+    clear_col1, clear_col2 = st.columns([3, 1])
+    with clear_col1:
         st.markdown("### 💬 CONVERSATION WORKSPACE")
-        
-        if "chat_history_global" not in st.session_state:
+    with clear_col2:
+        if st.button("🧹 Clear Chat History", use_container_width=True, type="secondary"):
             st.session_state.chat_history_global = []
+            st.rerun()
+    
+    if "chat_history_global" not in st.session_state:
+        st.session_state.chat_history_global = []
 
-        chat_container = st.container(height=400, border=True)
-        with chat_container:
-            if len(st.session_state.chat_history_global) == 0:
-                st.markdown(
-                    """
-                    <div style='text-align: center; color: #64748b; padding-top: 8rem;'>
-                        Hello Rupok! I am your central R&D Assistant node. How can I help you cross-reference your 
-                        formulation datasets or resolve chemical anomalies today?
-                    </div>
-                    """, 
-                    unsafe_allow_html=True
+    # Chat history viewport matching full container dimensions
+    chat_container = st.container(height=450, border=True)
+    with chat_container:
+        if len(st.session_state.chat_history_global) == 0:
+            st.markdown(
+                """
+                <div style='text-align: center; color: #64748b; padding-top: 9rem;'>
+                    Hello! I am your central R&D Assistant node. How can I help you cross-reference your 
+                    formulation datasets or resolve chemical anomalies today?
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
+        else:
+            for message in st.session_state.chat_history_global:
+                if message["role"] == "user":
+                    st.markdown(f'<div class="chat-row-user"><div class="chat-bubble-user">{message["text"]}</div></div>', unsafe_allow_html=True)
+                else:
+                    st.markdown(f'<div class="chat-row-ai"><div class="chat-body-ai">{message["text"]}</div></div><div class="gemini-turn-divider"></div>', unsafe_allow_html=True)
+
+    # Standard input action listener mapping
+    user_query = st.chat_input("Ask a cross-module formulation question...")
+    if user_query:
+        st.session_state.chat_history_global.append({"role": "user", "text": user_query})
+        
+        with st.spinner("Processing formulation parameters..."):
+            try:
+                model = genai.GenerativeModel("gemini-2.5-flash")
+                
+                system_system_prompt = (
+                    "You are Gemini, a highly advanced pharmaceutical development AI assistant working in the "
+                    "ACME Laboratories R&D division. Your user is an executive formulation scientist. Answer all questions "
+                    "with strict scientific accuracy, detailing structural mechanisms, compatibility logic, or physical "
+                    "chemistry rules whenever applicable."
                 )
-            else:
-                for message in st.session_state.chat_history_global:
-                    if message["role"] == "user":
-                        st.markdown(f'<div class="chat-row-user"><div class="chat-bubble-user">{message["text"]}</div></div>', unsafe_allow_html=True)
-                    else:
-                        st.markdown(f'<div class="chat-row-ai"><div class="chat-body-ai">{message["text"]}</div></div><div class="gemini-turn-divider"></div>', unsafe_allow_html=True)
-
-        # Chat input element
-        user_query = st.chat_input("Ask a cross-module formulation question...")
-        if user_query:
-            st.session_state.chat_history_global.append({"role": "user", "text": user_query})
-            
-            with st.spinner("Processing formulation parameters..."):
-                try:
-                    model = genai.GenerativeModel("gemini-2.5-flash")
-                    
-                    system_system_prompt = (
-                        "You are Gemini, a highly advanced pharmaceutical development AI assistant working in the "
-                        "ACME Laboratories R&D division. Your user is an executive formulation scientist. Answer all questions "
-                        "with strict scientific accuracy, detailing structural mechanisms, compatibility logic, or physical "
-                        "chemistry rules whenever applicable."
-                    )
-                    
-                    if active_literature:
-                        system_system_prompt += f"\n\n[LITERATURE MEMORY] Use the following extracted paper text parameters if helpful: {active_literature[:20000]}"
-                    if active_api:
-                        system_system_prompt += f"\n\n[API MOLECULE MEMORY] Use the following active profile parameters if helpful: {active_api}"
-                    
-                    compiled_messages = [f"System instruction: {system_system_prompt}\n"]
-                    for msg in st.session_state.chat_history_global:
-                        role_title = "User" if msg["role"] == "user" else "Assistant"
-                        compiled_messages.append(f"{role_title}: {msg['text']}\n")
-                    
-                    compiled_prompt_block = "".join(compiled_messages)
-                    response = model.generate_content(compiled_prompt_block)
-                    
-                    st.session_state.chat_history_global.append({"role": "assistant", "text": response.text})
-                    st.rerun()
-                except Exception as err:
-                    st.error(f"Error communicating with processing cluster parameters: {err}")
+                
+                if active_literature:
+                    system_system_prompt += f"\n\n[LITERATURE MEMORY] Use the following extracted paper text parameters if helpful: {active_literature[:20000]}"
+                if active_api:
+                    system_system_prompt += f"\n\n[API MOLECULE MEMORY] Use the following active profile parameters if helpful: {active_api}"
+                
+                compiled_messages = [f"System instruction: {system_system_prompt}\n"]
+                for msg in st.session_state.chat_history_global:
+                    role_title = "User" if msg["role"] == "user" else "Assistant"
+                    compiled_messages.append(f"{role_title}: {msg['text']}\n")
+                
+                compiled_prompt_block = "".join(compiled_messages)
+                response = model.generate_content(compiled_prompt_block)
+                
+                st.session_state.chat_history_global.append({"role": "assistant", "text": response.text})
+                st.rerun()
+            except Exception as err:
+                st.error(f"Error communicating with processing cluster parameters: {err}")

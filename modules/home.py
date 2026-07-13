@@ -3,14 +3,13 @@ from utils.navigation import go_to
 
 def show_home():
     # 1. READ INNER SYSTEM NAV CODES
-    # Looks for a change in page status sent by our flat text items
     if "nav_redirect_bridge" in st.session_state and st.session_state.nav_redirect_bridge:
         destination = st.session_state.nav_redirect_bridge
         del st.session_state["nav_redirect_bridge"]
         go_to(destination)
 
     # --------------------------------------------------------------------------
-    # 2. PREMIUM CSS OVERRIDE FOR TRUE HORIZONTAL LINK ALIGNMENT
+    # 2. PREMIUM CSS OVERRIDE FOR HORIZONTAL NAV & MAIN VIEW ALIGNMENT
     # --------------------------------------------------------------------------
     st.markdown(
         """
@@ -48,6 +47,12 @@ def show_home():
             font-weight: 700 !important;
             border-bottom: 2px solid #3b82f6 !important;
         }
+
+        .transparent-header-container {
+            background-color: transparent !important;
+            padding: 5px 0px 20px 0px;
+            margin-bottom: 10px;
+        }
         </style>
         """,
         unsafe_allow_html=True
@@ -56,8 +61,6 @@ def show_home():
     # --------------------------------------------------------------------------
     # 3. INTERACTIVE TEXT NAV LINER ROW (Guaranteed Single-Tab Routing)
     # --------------------------------------------------------------------------
-    # Using parent frame state modification forces the current Streamlit app layer
-    # to reload cleanly without opening duplicate tabs or breaking the back button.
     st.markdown(
         """
         <div class="navbar-horizontal-row">
@@ -68,9 +71,8 @@ def show_home():
             <span onclick="window.parent.postMessage({type: 'streamlit:set_component_value', value: 'Drug-Excipient Compatibility'}, '*')" class="navbar-text-item">Drug-Excipient Compatibility</span>
             <span onclick="window.parent.postMessage({type: 'streamlit:set_component_value', value: 'Pharmacokinetics'}, '*')" class="navbar-text-item">Pharmacokinetics</span>
             <span onclick="window.parent.postMessage({type: 'streamlit:set_component_value', value: 'DOE Optimization'}, '*')" class="navbar-text-item">DOE Optimization</span>
-            <span onclick="window.parent.postMessage({type: 'streamlit:set_component_value', value: 'AI Assistant'}, '*')" class="navbar-text-item">AI Assistant</span>
         </div>
-        <hr style="margin-top: 4px; margin-bottom: 25px; border: 0; border-top: 1px solid #e2e8f0;">
+        <hr style="margin-top: 4px; margin-bottom: 20px; border: 0; border-top: 1px solid #e2e8f0;">
         """,
         unsafe_allow_html=True
     )
@@ -187,49 +189,6 @@ def show_home():
             go_to("DOE Optimization")
 
     st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
-
-    # ================= ROW 3: POSITION 7 (AI ASSISTANT) =================
-    st.markdown(
-        """
-        <style>
-        .home-assistant-banner {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            border: 1px solid #3b82f6;
-            border-radius: 12px;
-            padding: 1.5rem 2rem;
-            margin-bottom: 1rem;
-        }
-        .assistant-title-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #f8fafc;
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        .assistant-desc-text {
-            color: #94a3b8;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            margin-bottom: 0.5rem;
-        }
-        </style>
-        <div class="home-assistant-banner">
-            <div class="assistant-title-row">🤖 AI Assistant Workspace</div>
-            <div class="assistant-desc-text">
-                Initialize conversational cross-module intelligence pipelines powered by Google Gemini. 
-                Cross-reference physicochemical properties against active patent literature data arrays instantly.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    
-    col_space, col_ai_btn = st.columns([3, 1])
-    with col_ai_btn:
-        if st.button("Launch AI Assistant Portal", use_container_width=True, type="primary", key="home_btn_ai"):
-            go_to("AI Assistant")
 
     st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
 

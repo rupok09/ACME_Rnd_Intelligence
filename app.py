@@ -67,63 +67,51 @@ show_rld_information = safe_import_module("modules.rld_information", "show_rld_i
 show_drug_excipient_compatibility = safe_import_module("modules.drug_excipient_compatibility", "show_drug_excipient_compatibility")
 show_pharmacokinetics = safe_import_module("modules.pharmacokinetics", "show_pharmacokinetics")
 show_doe_optimization = safe_import_module("modules.doe_optimization", "show_doe_optimization")
-show_ai_assistant = safe_import_module("modules.ai_assistant", "show_ai_assistant")
 show_login = safe_import_module("modules.login", "show_login")
 
 
-# ================= TOP BAR =================
+# ================= TOP BAR (BACK BUTTON & LOGIN ROW - ABSOLUTE TOP) =================
 top_back, top_title, top_login = st.columns([1, 5, 1])
 
 with top_back:
     if st.button("← Back", use_container_width=True, key="top_bar_back"):
         go_back()
 
-with top_title:
-    st.markdown(
-        "<div class='top-app-title'>ACME R&D Intelligence</div>",
-        unsafe_allow_html=True
-    )
-
 with top_login:
     if st.button("👤 Login", use_container_width=True, key="top_bar_login"):
         go_to("Login")
 
+# Spacer to separate the top bar from the canvas components cleanly
+st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+
 
 # ================= SIDEBAR =================
 with st.sidebar:
-    # 1. FIXED LOGO CORNER NODE: Side-by-side branding panel block
-    logo_side_col, title_side_col = st.columns([1, 3])
-    with logo_side_col:
-        # Fallback handling for logo image asset visualization
-        try:
-            st.image("assets/acme_logo.png", width=55)
-        except Exception:
-            st.markdown("### 🧪")
-            
-    with title_side_col:
-        st.markdown(
-            """
-            <div style="margin-top: -2px;">
-                <div style="color: #f8fafc; font-size: 1.1rem; font-weight: 700; line-height: 1.2;">ACME Laboratories Ltd.</div>
-                <div style="color: #94a3b8; font-size: 0.72rem; margin-top: 2px;">For Health • Vigour • Happiness</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
+    # 1. TRANSPARENT BRANDING CONTAINER BLOCK (Swapped legacy logo and text rows)
     st.markdown(
         """
-        <div style="border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px; margin-top: 5px;">
-            <span style="font-size: 0.75rem; font-weight: 600; color: #38bdf8; letter-spacing: 0.5px; text-transform: uppercase;">
-                Research & Development Hub
-            </span>
-            <span style="float: right; font-size: 0.7rem; color: #64748b; font-family: monospace;">v1.0.0</span>
+        <div style="
+            background: rgba(248, 250, 252, 0.05); 
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            padding: 16px; 
+            border-radius: 8px; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 15px;
+        ">
+            <h3 style="color: #f8fafc; margin: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.3px;">
+                🧪 ACME R&D Intelligence
+            </h3>
+            <p style="color: #94a3b8; font-size: 0.78rem; margin-top: 6px; margin-bottom: 0; line-height: 1.4;">
+                A modular AI platform for literature review, API characterization, RLD information, 
+                compatibility assessment, pharmacokinetics simulation, DOE optimization, and conversational AI assistance.
+            </p>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    # 2. Sequential Left-Hand Sidebar Module Quick Links Actions
+    # Left-Hand Navigation Actions
     if st.button("⌂ Home", use_container_width=True, key="side_nav_home"):
         go_home()
 
@@ -145,24 +133,6 @@ with st.sidebar:
     if st.button("📊 DOE Optimization", use_container_width=True, key="side_nav_doe"):
         go_to("DOE Optimization")
 
-    if st.button("🤖 AI Assistant", use_container_width=True, key="side_nav_ai"):
-        go_to("AI Assistant")
-
-    st.markdown(
-        """
-        <div class="sidebar-card" style="margin-top: 15px;">
-            <b>R&D Intelligence Hub</b><br><br>
-            A modular AI platform for literature review, API characterization, 
-            RLD information, compatibility assessment, pharmacokinetics simulation,
-            DOE optimization, and conversational AI assistance.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # ------------------------------------------------------------------------------
-    # DYNAMIC SIDEBAR USER CAPTURE PROFILE GRID
-    # ------------------------------------------------------------------------------
     st.markdown("---")
 
     if st.session_state.get("authenticated", False):
@@ -204,9 +174,6 @@ elif page == "Pharmacokinetics":
 
 elif page == "DOE Optimization":
     show_doe_optimization()
-
-elif page == "AI Assistant":
-    show_ai_assistant()
 
 elif page == "Login":
     show_login()
