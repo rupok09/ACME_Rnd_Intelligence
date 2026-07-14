@@ -41,7 +41,7 @@ def apply_compatibility_theme():
         
         /* Custom Clean Layout Headers matching Vercel UI */
         .section-header {
-            color: #475569;
+            color: #000000;
             font-size: 0.85rem;
             font-weight: 700;
             text-transform: uppercase;
@@ -50,6 +50,11 @@ def apply_compatibility_theme():
             margin-bottom: 0.75rem;
             border-bottom: 1px solid #e2e8f0;
             padding-bottom: 0.25rem;
+        }
+        
+        /* Force table text to be completely black */
+        table th, table td {
+            color: #000000 !important;
         }
         </style>
         """,
@@ -99,13 +104,12 @@ def render_molecule_svg(smiles):
     return None
 
 # ==========================================================================
-# LIVE PUBMED EXTERNAL DATABASE SEARCH INFRASTRUCTURE
+# LIVE COMPATIBILITY SEARCH INFRASTRUCTURE
 # ==========================================================================
 def fetch_real_pubmed_papers(drug, excipient):
     """Queries official NCBI PubMed APIs for true verifiable source citation links."""
     papers = []
     try:
-        # Step 1: Search for relevant article IDs matching binary targets
         search_term = f"{drug} AND {excipient} AND compatibility"
         search_url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={requests.utils.quote(search_term)}&retmode=json&retmax=3"
         
@@ -114,7 +118,6 @@ def fetch_real_pubmed_papers(drug, excipient):
             id_list = res.json().get("esearchresult", {}).get("idlist", [])
             
             if id_list:
-                # Step 2: Fetch detailed summary summaries for found article pointers
                 ids_str = ",".join(id_list)
                 summary_url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={ids_str}&retmode=json"
                 
@@ -235,7 +238,6 @@ def show_drug_excipient_compatibility():
                 smiles = get_smiles_from_pubchem(target_api)
                 molecule_svg = render_molecule_svg(smiles) if smiles else None
                 
-                # Fetch real database articles matching selection entries
                 primary_ex = selected_excipients[0] if selected_excipients else ""
                 real_citations = fetch_real_pubmed_papers(target_api, primary_ex)
                 
@@ -294,14 +296,14 @@ def show_drug_excipient_compatibility():
                         if svg_data:
                             st.markdown(f'<div style="text-align:center; background-color:white; padding:5px; border-radius:6px; border:1px solid #e2e8f0;">{svg_data}</div>', unsafe_allow_html=True)
                         else:
-                            st.markdown('<div style="height:100px; background-color:#f8fafc; display:flex; align-items:center; justify-content:center; border-radius:6px; border:1px dashed #cbd5e1; font-size:0.75rem; color:#64748b; text-align:center; padding:5px;">Structure Pending API Window</div>', unsafe_allow_html=True)
+                            st.markdown('<div style="height:100px; background-color:#f8fafc; display:flex; align-items:center; justify-content:center; border-radius:6px; border:1px dashed #cbd5e1; font-size:0.75rem; color:#000000; text-align:center; padding:5px;">Structure Pending API Window</div>', unsafe_allow_html=True)
                     
                     with data_col:
-                        st.markdown(f"**Name:** <span style='font-size:0.85rem; color:#1e293b;'>{st.session_state.active_screen_api.upper()}</span>", unsafe_allow_html=True)
-                        st.markdown(f"**Molecular Species:** <span style='font-size:0.85rem; color:#64748b;'>{dp.get('chemical_class', 'N/A')}</span>", unsafe_allow_html=True)
-                        st.markdown(f"**Molecular Weight:** <span style='font-size:0.85rem; color:#64748b;'>{dp.get('molecular_weight', 'N/A')}</span>", unsafe_allow_html=True)
+                        st.markdown(f"**Name:** <span style='font-size:0.85rem; color:#000000;'>{st.session_state.active_screen_api.upper()}</span>", unsafe_allow_html=True)
+                        st.markdown(f"**Molecular Species:** <span style='font-size:0.85rem; color:#000000;'>{dp.get('chemical_class', 'N/A')}</span>", unsafe_allow_html=True)
+                        st.markdown(f"**Molecular Weight:** <span style='font-size:0.85rem; color:#000000;'>{dp.get('molecular_weight', 'N/A')}</span>", unsafe_allow_html=True)
                     
-                    st.markdown(f"<p style='margin-top:10px; font-size:0.8rem; color:#475569;'><b>Detected Functional Groups:</b> {', '.join(dp.get('key_functional_groups', []))}</p>", unsafe_allow_html=True)
+                    st.markdown(f"<p style='margin-top:10px; font-size:0.8rem; color:#000000;'><b>Detected Functional Groups:</b> {', '.join(dp.get('key_functional_groups', []))}</p>", unsafe_allow_html=True)
 
             with col_excipient:
                 st.markdown('<div class="section-header">Excipient Profile</div>', unsafe_allow_html=True)
@@ -309,10 +311,10 @@ def show_drug_excipient_compatibility():
                     ep = data.get("excipient_profile", {})
                     primary_excipient = selected_excipients[0] if selected_excipients else "No Excipient Selected"
                     
-                    st.markdown(f"**Excipient:** <span style='float:right; font-size:0.85rem; font-weight:600;'>{primary_excipient}</span>", unsafe_allow_html=True)
-                    st.markdown(f"**Excipient CAS:** <span style='float:right; font-size:0.85rem; color:#64748b;'>{ep.get('cas_number', 'N/A')}</span>", unsafe_allow_html=True)
-                    st.markdown(f"**Excipient Formula:** <span style='float:right; font-size:0.85rem; color:#64748b;'>{ep.get('formula', 'N/A')}</span>", unsafe_allow_html=True)
-                    st.markdown(f"**Excipient Synonyms:** <span style='display:block; font-size:0.8rem; color:#64748b; text-align:right; margin-top:2px;'>{ep.get('synonyms', 'N/A')}</span>", unsafe_allow_html=True)
+                    st.markdown(f"**Excipient:** <span style='float:right; font-size:0.85rem; font-weight:600; color:#000000;'>{primary_excipient}</span>", unsafe_allow_html=True)
+                    st.markdown(f"**Excipient CAS:** <span style='float:right; font-size:0.85rem; color:#000000;'>{ep.get('cas_number', 'N/A')}</span>", unsafe_allow_html=True)
+                    st.markdown(f"**Excipient Formula:** <span style='float:right; font-size:0.85rem; color:#000000;'>{ep.get('formula', 'N/A')}</span>", unsafe_allow_html=True)
+                    st.markdown(f"**Excipient Synonyms:** <span style='display:block; font-size:0.8rem; color:#000000; text-align:right; margin-top:2px;'>{ep.get('synonyms', 'N/A')}</span>", unsafe_allow_html=True)
                     
                     st.markdown("<hr style='margin:8px 0;'>", unsafe_allow_html=True)
                     st.markdown(f"**Category:** <span style='float:right; font-size:0.85rem; color:#059669; font-weight:600;'>{ep.get('category', 'Formulation Agent')}</span>", unsafe_allow_html=True)
@@ -334,7 +336,7 @@ def show_drug_excipient_compatibility():
                 with r_c2:
                     st.markdown(f"**Rule-based risk:** &nbsp; {risk_badge}", unsafe_allow_html=True)
 
-        # --- TAB 2: IDENTIFIED EVIDENCE (WITH LIVE HYPERLINKS) ---
+        # --- TAB 2: IDENTIFIED EVIDENCE ---
         with tab_evidence:
             st.markdown('<div class="section-header">Identified Evidence</div>', unsafe_allow_html=True)
             evidence_list = data.get("identified_evidence", [])
@@ -351,8 +353,8 @@ def show_drug_excipient_compatibility():
                     table_rows.append({
                         "STUDY TYPE": f"<b>{ev.get('study_type', 'N/A')}</b>",
                         "COMPATIBILITY": badge,
-                        "SOURCE REFERENCE": f"<span style='color:#475569; font-size:0.8rem;'>{ev.get('source', 'N/A')}</span>",
-                        "SCIENTIFIC DETAILS": f"<span style='color:#334155; font-size:0.8rem;'>{ev.get('details', 'N/A')}</span>"
+                        "SOURCE REFERENCE": f"<span style='color:#000000; font-size:0.8rem;'>{ev.get('source', 'N/A')}</span>",
+                        "SCIENTIFIC DETAILS": f"<span style='color:#000000; font-size:0.8rem;'>{ev.get('details', 'N/A')}</span>"
                     })
                 
                 df = pd.DataFrame(table_rows)
@@ -360,13 +362,12 @@ def show_drug_excipient_compatibility():
             else:
                 st.info("No explicit binary literature exceptions matched against active criteria records.")
 
-            # Append the dynamic external database links segment seamlessly at the bottom
             if pubmed_data:
                 st.markdown('<div class="section-header" style="margin-top:25px;">Verifiable Literature Database References (PubMed)</div>', unsafe_allow_html=True)
                 for item in pubmed_data:
                     with st.container(border=True):
                         st.markdown(f"📄 **Title:** <a href='{item['url']}' target='_blank' style='font-weight:600; color:#0284c7; text-decoration:none;'>{item['title']}</a>", unsafe_allow_html=True)
-                        st.markdown(f"<span style='font-size:0.8rem; color:#64748b;'><b>Journal:</b> {item['source']} ({item['pubdate']})</span>", unsafe_allow_html=True)
+                        st.markdown(f"<span style='font-size:0.8rem; color:#000000;'><b>Journal:</b> {item['source']} ({item['pubdate']})</span>", unsafe_allow_html=True)
 
         # --- TAB 3: RULE-BASED EVIDENCE ---
         with tab_rules:
@@ -382,7 +383,7 @@ def show_drug_excipient_compatibility():
                         "GROUP FORMULA": f"<code>{rule.get('formula', 'N/A')}</code>",
                         "EXCIPIENT RISK GROUP": f"<b>{rule.get('excipient_group', 'N/A')}</b>",
                         "REACTION TYPE": rx_type,
-                        "INTERACTION DESCRIPTION": f"<span style='color:#334155; font-size:0.8rem;'>{rule.get('description', 'N/A')}</span>"
+                        "INTERACTION DESCRIPTION": f"<span style='color:#000000; font-size:0.8rem;'>{rule.get('description', 'N/A')}</span>"
                     })
                 
                 df_rules = pd.DataFrame(rule_rows)
@@ -393,7 +394,7 @@ def show_drug_excipient_compatibility():
         if not trigger_prediction:
             st.markdown(
                 """
-                <div style="text-align: center; padding: 8rem 2rem; color: #64748b; border: 2px dashed #e2e8f0; border-radius: 8px;">
+                <div style="text-align: center; padding: 6rem 2rem; color: #000000; border: 2px dashed #e2e8f0; border-radius: 8px;">
                     <strong>Awaiting Data Validation...</strong><br>
                     Execute an analytical query stream above to compile report arrays.
                 </div>
