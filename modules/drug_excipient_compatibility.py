@@ -99,6 +99,42 @@ def render_molecule_svg(smiles):
     return None
 
 # ==========================================================================
+# LIVE PUBMED EXTERNAL DATABASE SEARCH INFRASTRUCTURE
+# ==========================================================================
+def fetch_real_pubmed_papers(drug, excipient):
+    """Queries official NCBI PubMed APIs for true verifiable source citation links."""
+    papers = []
+    try:
+        # Step 1: Search for relevant article IDs matching binary targets
+        search_term = f"{drug} AND {excipient} AND compatibility"
+        search_url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={requests.utils.quote(search_term)}&retmode=json&retmax=3"
+        
+        res = requests.get(search_url, timeout=5)
+        if res.status_code == 200:
+            id_list = res.json().get("esearchresult", {}).get("idlist", [])
+            
+            if id_list:
+                # Step 2: Fetch detailed summary summaries for found article pointers
+                ids_str = ",".join(id_list)
+                summary_url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={ids_str}&retmode=json"
+                
+                sum_res = requests.get(summary_url, timeout=5)
+                if sum_res.status_code == 200:
+                    results = sum_res.json().get("result", {})
+                    for pmid in id_list:
+                        paper_info = results.get(pmid, {})
+                        if paper_info and "title" in paper_info:
+                            papers.append({
+                                "title": paper_info.get("title", "Unknown Title"),
+                                "source": paper_info.get("source", "PubMed Journal"),
+                                "pubdate": paper_info.get("pubdate", "N/A"),
+                                "url": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"
+                            })
+    except Exception:
+        pass
+    return papers
+
+# ==========================================================================
 # INTERFACE VIEW RENDERER PORTAL
 # ==========================================================================
 def show_drug_excipient_compatibility():
@@ -199,6 +235,10 @@ def show_drug_excipient_compatibility():
                 smiles = get_smiles_from_pubchem(target_api)
                 molecule_svg = render_molecule_svg(smiles) if smiles else None
                 
+                # Fetch real database articles matching selection entries
+                primary_ex = selected_excipients[0] if selected_excipients else ""
+                real_citations = fetch_real_pubmed_papers(target_api, primary_ex)
+                
                 model = genai.GenerativeModel("gemini-2.5-flash")
                 analysis_prompt = (
                     f"You are an advanced computational chemistry platform specializing in pharmaceutical formulation risk assessment.\n"
@@ -220,6 +260,7 @@ def show_drug_excipient_compatibility():
                 st.session_state.compat_structured_results = json.loads(response.text)
                 st.session_state.active_screen_api = target_api
                 st.session_state.active_molecule_svg = molecule_svg
+                st.session_state.pubmed_links_cache = real_citations
                 
             except Exception as err:
                 err_msg = str(err)
@@ -231,6 +272,7 @@ def show_drug_excipient_compatibility():
     if "compat_structured_results" in st.session_state and st.session_state.get("compat_structured_results"):
         data = st.session_state.compat_structured_results
         svg_data = st.session_state.get("active_molecule_svg", None)
+        pubmed_data = st.session_state.get("pubmed_links_cache", [])
         
         tab_info, tab_evidence, tab_rules = st.tabs([
             "Formulation information", 
@@ -292,7 +334,7 @@ def show_drug_excipient_compatibility():
                 with r_c2:
                     st.markdown(f"**Rule-based risk:** &nbsp; {risk_badge}", unsafe_allow_html=True)
 
-        # --- TAB 2: IDENTIFIED EVIDENCE ---
+        # --- TAB 2: IDENTIFIED EVIDENCE (WITH LIVE HYPERLINKS) ---
         with tab_evidence:
             st.markdown('<div class="section-header">Identified Evidence</div>', unsafe_allow_html=True)
             evidence_list = data.get("identified_evidence", [])
@@ -317,6 +359,14 @@ def show_drug_excipient_compatibility():
                 st.write(df.to_html(escape=False, index=False), unsafe_allow_html=True)
             else:
                 st.info("No explicit binary literature exceptions matched against active criteria records.")
+
+            # Append the dynamic external database links segment seamlessly at the bottom
+            if pubmed_data:
+                st.markdown('<div class="section-header" style="margin-top:25px;">Verifiable Literature Database References (PubMed)</div>', unsafe_allow_html=True)
+                for item in pubmed_data:
+                    with st.container(border=True):
+                        st.markdown(f"📄 **Title:** <a href='{item['url']}' target='_blank' style='font-weight:600; color:#0284c7; text-decoration:none;'>{item['title']}</a>", unsafe_allow_html=True)
+                        st.markdown(f"<span style='font-size:0.8rem; color:#64748b;'><b>Journal:</b> {item['source']} ({item['pubdate']})</span>", unsafe_allow_html=True)
 
         # --- TAB 3: RULE-BASED EVIDENCE ---
         with tab_rules:
@@ -343,7 +393,7 @@ def show_drug_excipient_compatibility():
         if not trigger_prediction:
             st.markdown(
                 """
-                <div style="text-align: center; padding: 6rem 2rem; color: #64748b; border: 2px dashed #e2e8f0; border-radius: 8px;">
+                <div style="text-align: center; padding: 8rem 2rem; color: #64748b; border: 2px dashed #e2e8f0; border-radius: 8px;">
                     <strong>Awaiting Data Validation...</strong><br>
                     Execute an analytical query stream above to compile report arrays.
                 </div>
