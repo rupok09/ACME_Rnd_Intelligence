@@ -85,58 +85,6 @@ def apply_literature_theme():
         unsafe_allow_html=True
     )
 
-def execute_local_text_mining_fallback(text, file_names):
-    """Local text analytics fallback parser triggered if all cloud model alternatives hit free tier limits."""
-    fallback_matrix = []
-    text_lower = text.lower()
-    primary_file = file_names[0] if file_names else "Uploaded Document"
-    
-    # 1. API Solubility
-    sol_value = "Solubility limits not explicitly isolated via local rules index."
-    for line in text.split('\n'):
-        if "solub" in line.lower() or "mg/ml" in line.lower():
-            sol_value = line.strip()
-            break
-    fallback_matrix.append({
-        'file_name': primary_file, 'metric': 'API Solubility',
-        'extracted_value': sol_value[:150], 'evidence_trail': "Scanned via local text string patterns."
-    })
-    
-    # 2. Dosage Form Type
-    form_value = "Solid oral dosage form"
-    for term in ["tablet", "capsule", "pellet", "suspension"]:
-        if term in text_lower:
-            form_value = f"{term.capitalize()} formulation configuration detected."
-            break
-    fallback_matrix.append({
-        'file_name': primary_file, 'metric': 'Dosage Form Type',
-        'extracted_value': form_value, 'evidence_trail': "Structural keywords located within document text strings."
-    })
-    
-    # 3. Excipient / Carrier Composition
-    excipients = []
-    for exc in ["cellulose", "stearate", "lactose", "starch", "povidone", "silicon"]:
-        if exc in text_lower:
-            excipients.append(exc.capitalize())
-    fallback_matrix.append({
-        'file_name': primary_file, 'metric': 'Excipient / Carrier Composition',
-        'extracted_value': ", ".join(excipients) if excipients else "Standard reference matrix carriers.",
-        'evidence_trail': "Matched against internal local reference library indexes."
-    })
-    
-    # 4. Key Findings / BCS Class
-    bcs_value = "BCS Class tracking requires complete cloud verification."
-    for bcs_term in ["bcs class i", "bcs class ii", "bcs class iii", "bcs class iv"]:
-        if bcs_term in text_lower:
-            bcs_value = bcs_term.upper()
-            break
-    fallback_matrix.append({
-        'file_name': primary_file, 'metric': 'Key Findings / BCS Class',
-        'extracted_value': bcs_value, 'evidence_trail': "Direct target signature mapped locally."
-    })
-    
-    return fallback_matrix
-
 def show_literature_intelligence():
     apply_literature_theme()
 
@@ -153,7 +101,6 @@ def show_literature_intelligence():
         unsafe_allow_html=True
     )
 
-    # FIXED: Bypassed standard workspace input block forms. Force login terminal checks.
     if not st.session_state.get("authenticated", False):
         st.warning("⚠️ Access Denied. Please navigate to the Login portal module tab in the sidebar navigation stack to unlock system assets.")
         return
@@ -181,10 +128,8 @@ def show_literature_intelligence():
             if current_names != st.session_state.loaded_file_names:
                 st.session_state.extracted_doc_text = ""
                 st.session_state.loaded_file_names = current_names
-                st.session_state.structured_matrix_data = None
                 st.session_state.suggested_questions = []
                 st.session_state.chat_history_lit = []
-                st.session_state.lit_fallback_active = False
                 
                 with st.spinner("Processing local text extraction across files..."):
                     master_compiled_text = ""
@@ -216,18 +161,14 @@ def show_literature_intelligence():
                 if st.button("Remove All Documents", use_container_width=True):
                     st.session_state.extracted_doc_text = ""
                     st.session_state.loaded_file_names = []
-                    st.session_state.structured_matrix_data = None
                     st.session_state.suggested_questions = []
                     st.session_state.chat_history_lit = []
-                    st.session_state.lit_fallback_active = False
                     st.rerun()
         else:
             st.session_state.extracted_doc_text = ""
             st.session_state.loaded_file_names = []
-            st.session_state.structured_matrix_data = None
             st.session_state.suggested_questions = []
             st.session_state.chat_history_lit = []
-            st.session_state.lit_fallback_active = False
             st.markdown(
                 """
                 <div style="border: 2px dashed #334155; border-radius: 8px; padding: 3rem; text-align: center; color: #64748b;">
@@ -284,8 +225,8 @@ def show_literature_intelligence():
                         "Are stability profiles mentioned?"
                     ]
 
-            tab_chat, tab_matrix, tab_preview = st.tabs([
-                "💬 AI Review Chat", "📊 Structured Extraction Table", "📄 Manual Document Viewers"
+            tab_chat, tab_preview = st.tabs([
+                "💬 AI Review Chat", "📄 Manual Document Viewers"
             ])
 
             clicked_query = None
@@ -316,7 +257,7 @@ def show_literature_intelligence():
             
             if active_input:
                 st.session_state.chat_history_lit.append({"role": "user", "text": active_input})
-                with st.spinner("Analyzing data tables across repositories..."):
+                with st.spinner("Analyzing document references..."):
                     context_guided_prompt = (
                         f"You are a helpful and precise AI collaborator assisting a pharmaceutical formulation scientist.\n"
                         f"Answer the user's question accurately using this reference text data matrix:\n"
@@ -338,60 +279,7 @@ def show_literature_intelligence():
                     if not chat_success:
                         st.error("⚠️ Token pipeline overtaxed across available models. Please paste an alternative key up top or wait for the quota window to clear.")
 
-            # --- TAB 2: AUTOMATED STRUCTURED PARAMETER MATRIX ---
-            with tab_matrix:
-                st.markdown("### 📊 Automated Multi-File Parameter Matrix")
-                st.caption("AI-driven deep structured extraction running verification mappings against source text elements.")
-
-                if st.session_state.get("structured_matrix_data") is None:
-                    with st.spinner("Compiling cross-document metrics data matrices..."):
-                        matrix_prompt = (
-                            f"Analyze the attached text and parse out critical pharmaceutical design metrics. "
-                            f"Extract information for these 4 fields: 1. 'API Solubility', 2. 'Dosage Form Type', 3. 'Excipient / Carrier Composition', 4. 'Key Findings / BCS Class'.\n"
-                            f"Format strictly as JSON array of objects: [{{'file_name': '...', 'metric': '...', 'extracted_value': '...', 'evidence_trail': '...'}}]\n\n"
-                            f"Context Matrix:\n{st.session_state.extracted_doc_text[:30000]}"
-                        )
-                        
-                        parsed_successfully = False
-                        for model_variant in MODEL_HIERARCHY:
-                            try:
-                                genai.configure(api_key=api_key)
-                                matrix_model = genai.GenerativeModel(model_variant)
-                                matrix_response = matrix_model.generate_content(matrix_prompt, generation_config={"response_mime_type": "application/json"})
-                                st.session_state.structured_matrix_data = json.loads(matrix_response.text)
-                                st.session_state.lit_fallback_active = False
-                                parsed_successfully = True
-                                break
-                            except Exception as m_err:
-                                if "429" in str(m_err) or "quota" in str(m_err).lower():
-                                    st.toast(f"⏳ {model_variant} limits reached. Routing processing thread to fallback layer...")
-                                    continue
-                        
-                        if not parsed_successfully:
-                            st.session_state.structured_matrix_data = execute_local_text_mining_fallback(st.session_state.extracted_doc_text, current_names)
-                            st.session_state.lit_fallback_active = True
-                            st.toast("⚡ Daily cloud limits reached. Swapped over to local parsing structures.", icon="⚙️")
-
-                if st.session_state.get("structured_matrix_data"):
-                    if st.session_state.get("lit_fallback_active", False):
-                        st.markdown("⚠️ *Displaying local heuristic keyword matrix extraction (Cloud engine rate-limited).*")
-                    st.markdown("---")
-                    for entry in st.session_state.structured_matrix_data:
-                        with st.container(border=True):
-                            m_col1, m_col2 = st.columns([1, 2])
-                            with m_col1:
-                                st.markdown(f"📁 **File:** `{entry.get('file_name', 'N/A')}`")
-                                st.markdown(f"📌 **Parameter:** `{entry.get('metric', 'N/A')}`")
-                            with m_col2:
-                                st.markdown(f"💡 **Extracted Metric Value:**\n*{entry.get('extracted_value', 'N/A')}*")
-                                st.markdown(
-                                    f"""<div style='background-color:#f1f5f9; padding:8px; border-left:3px solid #10b981; font-size:0.8rem; color:#475569;'>
-                                        📄 <strong>Direct Evidence Trail:</strong><br>"{entry.get('evidence_trail', 'N/A')}"
-                                    </div>""", 
-                                    unsafe_allow_html=True
-                                )
-
-            # --- TAB 3: BASE64 DOCUMENT PREVIEWER ---
+            # --- TAB 2: MANUAL DOCUMENT VIEWERS ---
             with tab_preview:
                 target_doc_name = st.selectbox("Select document viewport to render:", current_names)
                 for f in uploaded_pdfs:
