@@ -11,13 +11,82 @@ import requests
 from rdkit import Chem
 from rdkit.Chem import Draw
 
-# Import the clean theme and verification modules from your utilities path
-from utils.compatibility_helpers import apply_compatibility_theme, check_compatibility_credentials
+# ==========================================================================
+# INLINED UTILITY CORE MECHANICS (FORMERLY COMPATIBILITY_HELPERS.PY)
+# ==========================================================================
+def apply_compatibility_theme():
+    """Injects high-contrast enterprise styling blocks matching unified application standards."""
+    st.markdown(
+        """
+        <style>
+        /* Shared Dashboard Banner Design */
+        .compat-banner {
+            background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+            border: 1px solid #059669;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .compat-title {
+            color: #f8fafc;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .compat-subtitle {
+            color: #a7f3d0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        /* Direct Risk Badging */
+        .risk-high {
+            color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .risk-medium {
+            color: #f59e0b;
+            background-color: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .risk-low {
+            color: #10b981;
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
+def check_compatibility_credentials():
+    """Resolves session API keys and displays the dynamic onboarding setup wizard if vacant."""
+    if not st.session_state.get("authenticated", False):
+        st.warning("⚠️ Access Denied. Please navigate to the Login portal module tab in the sidebar navigation stack to unlock system assets.")
+        return None
+
+    api_key = st.session_state.get("gemini_api_key", "")
+    return api_key
+
+# ==========================================================================
+# MOLECULAR GRAPHICS & SEARCH INFRASTRUCTURE
+# ==========================================================================
 def get_smiles_from_pubchem(api_name):
     """Fetches canonical SMILES strings with optimized name sanitization for pharmaceutical salts."""
     try:
-        # Sanitize common salt extensions to optimize parent molecule lookup rates
         clean_name = api_name.lower()
         for salt in [" bisulfate", " besylate", " hydrochloride", " hcl", " maleate", " sodium", " calcium", " fumarate"]:
             clean_name = clean_name.replace(salt, "")
@@ -45,6 +114,9 @@ def render_molecule_svg(smiles):
         pass
     return None
 
+# ==========================================================================
+# INTERFACE VIEW RENDERER PORTAL
+# ==========================================================================
 def show_drug_excipient_compatibility():
     apply_compatibility_theme()
 
@@ -78,7 +150,6 @@ def show_drug_excipient_compatibility():
         with st.container(border=True):
             target_api = st.text_input("Active Pharmaceutical Ingredient (API)", placeholder="e.g., Clopidogrel Bisulfate, Aspirin")
             
-            # Expanded and categorized industrial excipient matrix options
             comprehensive_excipients = [
                 # --- Diluents / Fillers ---
                 "Microcrystalline Cellulose (MCC) PH-101",
@@ -140,7 +211,6 @@ def show_drug_excipient_compatibility():
                 options=comprehensive_excipients,
             )
             
-            # Expanded Solid Oral Dosage Form Options
             expanded_dosage_forms = [
                 "Immediate-Release Tablet (Film-Coated)",
                 "Immediate-Release Tablet (Uncoated)",
@@ -175,11 +245,9 @@ def show_drug_excipient_compatibility():
             
             with st.spinner("Executing structural functional-group mechanistic queries..."):
                 try:
-                    # 1. Fetch structure maps using the sanitized utility function
                     smiles = get_smiles_from_pubchem(target_api)
                     molecule_svg = render_molecule_svg(smiles) if smiles else None
                     
-                    # 2. Query Gemini analysis model
                     model = genai.GenerativeModel("gemini-2.5-flash")
                     analysis_prompt = (
                         f"You are an advanced computational chemistry platform specializing in pharmaceutical formulation risk assessment.\n"
@@ -198,13 +266,11 @@ def show_drug_excipient_compatibility():
                         generation_config={"response_mime_type": "application/json"}
                     )
                     
-                    # Store variables in session context upon validation success
                     st.session_state.compat_structured_results = json.loads(response.text)
                     st.session_state.active_screen_api = target_api
                     st.session_state.active_molecule_svg = molecule_svg
                     
                 except Exception as err:
-                    # Intercept API limit overloads and replace with clear user alerts
                     err_msg = str(err)
                     if "429" in err_msg or "quota" in err_msg.lower():
                         st.error("⚠️ **API Rate Limit Exceeded (Error 429)**: The workspace is experiencing high request volume. Please wait roughly 30–60 seconds before executing your next analytical run.")
