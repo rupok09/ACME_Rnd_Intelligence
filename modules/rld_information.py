@@ -3,6 +3,7 @@ import pandas as pd
 from urllib.parse import quote_plus
 import requests
 import base64
+import fitz  # PyMuPDF for secure local extraction mapping
 
 from utils.orange_book import (
     search_orange_book,
@@ -21,6 +22,37 @@ from utils.dailymed_pdf_reader import (
 )
 
 from utils.rld_excel_export import create_rld_excel_report
+
+
+def apply_rld_custom_styles():
+    """Injects high-contrast enterprise text sizing blocks to look like a desktop PDF viewer."""
+    st.markdown(
+        """
+        <style>
+        .pdf-image-scroll-stage {
+            background-color: #525659;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            height: 600px;
+            overflow-y: scroll;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .rld-page-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border-radius: 2px;
+            background-color: white;
+            padding: 0;
+            margin: 10px auto;
+            max-width: 95%;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 def make_link_table(df, link_columns):
@@ -44,6 +76,7 @@ def make_link_table(df, link_columns):
 
 
 def show_rld_information():
+    apply_rld_custom_styles()
     st.title("RLD Information")
 
     st.write(
@@ -178,20 +211,40 @@ def show_rld_information():
         selected_label = labels[label_options.index(selected_label_text)]
         st.session_state.selected_dailymed_label = selected_label
 
-        # FIXED: Fetch remote PDF bytes via backend stream and parse to standard base64 inline frame context
         st.markdown("#### 📄 Drug Label Document Preview")
         try:
             pdf_url = selected_label["pdf_link"]
-            with st.spinner("Downloading and processing secure label preview stream..."):
-                response = requests.get(pdf_url, timeout=10)
+            with st.spinner("Downloading and rendering label document pages..."):
+                response = requests.get(pdf_url, timeout=15)
                 if response.status_code == 200:
-                    base64_pdf = base64.b64encode(response.content).decode('utf-8')
-                    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="700" type="application/pdf"></iframe>'
-                    st.markdown(pdf_display, unsafe_allow_html=True)
+                    pdf_data = response.content
+                    doc = fitz.open(stream=pdf_data, filetype="pdf")
+                    
+                    html_image_stream = ""
+                    for page_num, page in enumerate(doc, start=1):
+                        # Draw high-fidelity visual pixel map matrix arrays
+                        pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))
+                        img_bytes = pix.tobytes("png")
+                        base64_img = base64.b64encode(img_bytes).decode('utf-8')
+                        
+                        html_image_stream += f"""
+                        <div class="rld-page-shadow">
+                            <img src="data:image/png;base64,{base64_img}" style="width:100%; display:block;" />
+                        </div>
+                        """
+                    
+                    st.markdown(
+                        f"""
+                        <div class="pdf-image-scroll-stage">
+                            {html_image_stream}
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
                 else:
                     st.error(f"Failed to pull content structure from portal endpoint (Status Code: {response.status_code})")
         except Exception as preview_err:
-            st.error(f"Unable to render local base64 document frame data: {preview_err}")
+            st.error(f"Unable to render local document data stream: {preview_err}")
             
         st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
         st.link_button(

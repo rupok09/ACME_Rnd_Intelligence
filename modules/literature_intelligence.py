@@ -1,8 +1,7 @@
 import streamlit as st
-import fitz  # PyMuPDF for optimized local browser text mining
+import fitz  # PyMuPDF for high-performance rendering maps
 import google.generativeai as genai
 import os
-import base64
 import json
 from dotenv import load_dotenv
 
@@ -81,20 +80,26 @@ def apply_literature_theme():
             width: 100%;
         }
 
-        /* Native Secure Document Preview Wrapper Frame */
-        .pdf-render-scroll-stage {
-            background-color: #ffffff;
+        /* Native Secure Document Preview Canvas Wrapper Box */
+        .pdf-render-image-stage {
+            background-color: #525659;
             border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 25px;
+            border-radius: 8px;
+            padding: 20px;
             height: 600px;
             overflow-y: scroll;
-            font-family: 'Courier New', Courier, monospace;
-            white-space: pre-wrap;
-            color: #000000 !important;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .page-shadow-wrapper {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border-radius: 2px;
+            background-color: white;
+            padding: 0;
+            margin: 10px auto;
+            max-width: 95%;
         }
         </style>
         """,
@@ -146,11 +151,9 @@ def show_literature_intelligence():
                 st.session_state.loaded_file_names = current_names
                 st.session_state.suggested_questions = []
                 st.session_state.chat_history_lit = []
+                st.session_state.individual_images_cache = {}
                 
-                # Active dictionary cache mapping individual files to separated strings
-                st.session_state.individual_docs_cache = {}
-                
-                with st.spinner("Processing local text extraction across files..."):
+                with st.spinner("Processing local text and visual extraction mappings..."):
                     master_compiled_text = ""
                     for f in uploaded_pdfs:
                         try:
@@ -160,18 +163,24 @@ def show_literature_intelligence():
                                 continue
                             doc = fitz.open(stream=pdf_bytes, filetype="pdf")
                             
-                            file_specific_text = ""
                             master_compiled_text += f"\n\n==================================================\n"
                             master_compiled_text += f"START OF DOCUMENT: {f.name}\n"
                             master_compiled_text += f"==================================================\n"
                             
+                            page_images_list = []
                             for page_num, page in enumerate(doc, start=1):
+                                # Compile Text Context Matrix for LLM Processing
                                 extracted_page = page.get_text()
-                                file_specific_text += f"\n--- [PAGE {page_num}] ---\n{extracted_page}"
                                 master_compiled_text += f"\n--- [{f.name} | PAGE {page_num}] ---\n{extracted_page}"
+                                
+                                # Render Page to High-Definition Matrix PNG
+                                pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))
+                                img_bytes = pix.tobytes("png")
+                                base64_img = base64.b64encode(img_bytes).decode('utf-8')
+                                page_images_list.append(base64_img)
                             
-                            # Cache the separated string map for individual tab selections
-                            st.session_state.individual_docs_cache[f.name] = file_specific_text.strip()
+                            # Cache images list for individual file viewer tab allocations
+                            st.session_state.individual_images_cache[f.name] = page_images_list
                                 
                         except Exception as parse_err:
                             st.error(f"Error parsing text footprint inside {f.name}: {parse_err}")
@@ -190,14 +199,14 @@ def show_literature_intelligence():
                     st.session_state.loaded_file_names = []
                     st.session_state.suggested_questions = []
                     st.session_state.chat_history_lit = []
-                    st.session_state.individual_docs_cache = {}
+                    st.session_state.individual_images_cache = {}
                     st.rerun()
         else:
             st.session_state.extracted_doc_text = ""
             st.session_state.loaded_file_names = []
             st.session_state.suggested_questions = []
             st.session_state.chat_history_lit = []
-            st.session_state.individual_docs_cache = {}
+            st.session_state.individual_images_cache = {}
             st.markdown(
                 """
                 <div style="border: 2px dashed #334155; border-radius: 8px; padding: 3rem; text-align: center; color: #64748b;">
@@ -228,9 +237,6 @@ def show_literature_intelligence():
             if "chat_history_lit" not in st.session_state:
                 st.session_state.chat_history_lit = []
 
-            # ------------------------------------------------------------------
-            # TASK SUITABILITY ROUTING ENGINE (FOR CHIP QUESTIONS)
-            # ------------------------------------------------------------------
             if not st.session_state.get("suggested_questions"):
                 kw_prompt = (
                     f"Review the following text data and formulate 3 short analytical questions. "
@@ -260,7 +266,6 @@ def show_literature_intelligence():
 
             clicked_query = None
 
-            # --- TAB 1: AI REVIEW CHAT ---
             with tab_chat:
                 chat_container = st.container(height=400, border=True)
                 with chat_container:
@@ -308,17 +313,24 @@ def show_literature_intelligence():
                     if not chat_success:
                         st.error("⚠️ Token pipeline overtaxed across available models. Please paste an alternative key up top or wait for the quota window to clear.")
 
-            # --- TAB 2: MANUAL DOCUMENT VIEWERS (BYPASSING BLOCKED IFRAMES) ---
+            # --- TAB 2: MANUAL DOCUMENT VIEWERS (TRUE IMAGE VIEWER OVERHAUL) ---
             with tab_preview:
                 target_doc_name = st.selectbox("Select document viewport to render:", current_names)
-                if "individual_docs_cache" in st.session_state and target_doc_name in st.session_state.individual_docs_cache:
-                    doc_raw_text = st.session_state.individual_docs_cache[target_doc_name]
+                if "individual_images_cache" in st.session_state and target_doc_name in st.session_state.individual_images_cache:
+                    cached_images = st.session_state.individual_images_cache[target_doc_name]
                     
-                    # Injects text data inside a secure, scrollable box wrapper (completely immune to Chrome blocking)
+                    html_image_stream = ""
+                    for base64_img in cached_images:
+                        html_image_stream += f"""
+                        <div class="page-shadow-wrapper">
+                            <img src="data:image/png;base64,{base64_img}" style="width:100%; display:block;" />
+                        </div>
+                        """
+                    
                     st.markdown(
                         f"""
-                        <div class="pdf-render-scroll-stage">
-{doc_raw_text}
+                        <div class="pdf-render-image-stage">
+                            {html_image_stream}
                         </div>
                         """, 
                         unsafe_allow_html=True
