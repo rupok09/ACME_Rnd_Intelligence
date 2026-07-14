@@ -80,6 +80,22 @@ def apply_literature_theme():
             margin: 1.5rem 0;
             width: 100%;
         }
+
+        /* Native Secure Document Preview Wrapper Frame */
+        .pdf-render-scroll-stage {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 25px;
+            height: 600px;
+            overflow-y: scroll;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            color: #000000 !important;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        }
         </style>
         """,
         unsafe_allow_html=True
@@ -131,6 +147,9 @@ def show_literature_intelligence():
                 st.session_state.suggested_questions = []
                 st.session_state.chat_history_lit = []
                 
+                # Active dictionary cache mapping individual files to separated strings
+                st.session_state.individual_docs_cache = {}
+                
                 with st.spinner("Processing local text extraction across files..."):
                     master_compiled_text = ""
                     for f in uploaded_pdfs:
@@ -140,12 +159,20 @@ def show_literature_intelligence():
                             if not pdf_bytes:
                                 continue
                             doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+                            
+                            file_specific_text = ""
                             master_compiled_text += f"\n\n==================================================\n"
                             master_compiled_text += f"START OF DOCUMENT: {f.name}\n"
                             master_compiled_text += f"==================================================\n"
+                            
                             for page_num, page in enumerate(doc, start=1):
-                                master_compiled_text += f"\n--- [{f.name} | PAGE {page_num}] ---\n"
-                                master_compiled_text += page.get_text()
+                                extracted_page = page.get_text()
+                                file_specific_text += f"\n--- [PAGE {page_num}] ---\n{extracted_page}"
+                                master_compiled_text += f"\n--- [{f.name} | PAGE {page_num}] ---\n{extracted_page}"
+                            
+                            # Cache the separated string map for individual tab selections
+                            st.session_state.individual_docs_cache[f.name] = file_specific_text.strip()
+                                
                         except Exception as parse_err:
                             st.error(f"Error parsing text footprint inside {f.name}: {parse_err}")
                     
@@ -163,12 +190,14 @@ def show_literature_intelligence():
                     st.session_state.loaded_file_names = []
                     st.session_state.suggested_questions = []
                     st.session_state.chat_history_lit = []
+                    st.session_state.individual_docs_cache = {}
                     st.rerun()
         else:
             st.session_state.extracted_doc_text = ""
             st.session_state.loaded_file_names = []
             st.session_state.suggested_questions = []
             st.session_state.chat_history_lit = []
+            st.session_state.individual_docs_cache = {}
             st.markdown(
                 """
                 <div style="border: 2px dashed #334155; border-radius: 8px; padding: 3rem; text-align: center; color: #64748b;">
@@ -279,14 +308,20 @@ def show_literature_intelligence():
                     if not chat_success:
                         st.error("⚠️ Token pipeline overtaxed across available models. Please paste an alternative key up top or wait for the quota window to clear.")
 
-            # --- TAB 2: MANUAL DOCUMENT VIEWERS ---
+            # --- TAB 2: MANUAL DOCUMENT VIEWERS (BYPASSING BLOCKED IFRAMES) ---
             with tab_preview:
                 target_doc_name = st.selectbox("Select document viewport to render:", current_names)
-                for f in uploaded_pdfs:
-                    if f.name == target_doc_name:
-                        try:
-                            base64_pdf = base64.b64encode(f.getvalue()).decode('utf-8')
-                            pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="600" type="application/pdf"></iframe>'
-                            st.markdown(pdf_display, unsafe_allow_html=True)
-                        except Exception as preview_err:
-                            st.error(f"Unable to generate preview layout for {f.name}: {preview_err}")
+                if "individual_docs_cache" in st.session_state and target_doc_name in st.session_state.individual_docs_cache:
+                    doc_raw_text = st.session_state.individual_docs_cache[target_doc_name]
+                    
+                    # Injects text data inside a secure, scrollable box wrapper (completely immune to Chrome blocking)
+                    st.markdown(
+                        f"""
+                        <div class="pdf-render-scroll-stage">
+{doc_raw_text}
+                        </div>
+                        """, 
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.info("Processing structured workspace rendering maps...")
