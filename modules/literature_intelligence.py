@@ -3,6 +3,7 @@ import fitz  # PyMuPDF for high-performance rendering maps
 import google.generativeai as genai
 import os
 import json
+import base64  # <-- FIXED: Explicitly added missing import module
 from dotenv import load_dotenv
 
 # Load background credentials immediately on module invocation
