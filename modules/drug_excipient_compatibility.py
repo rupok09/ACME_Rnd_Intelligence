@@ -29,20 +29,20 @@ def apply_compatibility_theme():
         }
         .compat-title {
             color: #f8fafc;
-            font-size: 2rem;
+            font-size: 2.1rem; /* Scaled up by 1 */
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
         .compat-subtitle {
             color: #a7f3d0;
-            font-size: 0.95rem;
+            font-size: 1.05rem; /* Scaled up by 1 */
             line-height: 1.5;
         }
         
         /* Custom Clean Layout Headers matching Vercel UI */
         .section-header {
             color: #000000;
-            font-size: 0.85rem;
+            font-size: 0.95rem; /* Scaled up by 1 */
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -52,9 +52,20 @@ def apply_compatibility_theme():
             padding-bottom: 0.25rem;
         }
         
-        /* Force table text to be completely black */
+        /* Universal Text Size Scaling & Font Color Forcing */
         table th, table td {
             color: #000000 !important;
+            font-size: 0.9rem !important; /* Scaled up by 1 for readable table vectors */
+        }
+        
+        .scaled-text {
+            font-size: 0.95rem !important; /* Standardized text layout increment */
+            color: #000000 !important;
+        }
+        .scaled-title {
+            font-size: 1.2rem !important;
+            font-weight: 600;
+            color: #000000;
         }
         </style>
         """,
@@ -296,14 +307,14 @@ def show_drug_excipient_compatibility():
                         if svg_data:
                             st.markdown(f'<div style="text-align:center; background-color:white; padding:5px; border-radius:6px; border:1px solid #e2e8f0;">{svg_data}</div>', unsafe_allow_html=True)
                         else:
-                            st.markdown('<div style="height:100px; background-color:#f8fafc; display:flex; align-items:center; justify-content:center; border-radius:6px; border:1px dashed #cbd5e1; font-size:0.75rem; color:#000000; text-align:center; padding:5px;">Structure Pending API Window</div>', unsafe_allow_html=True)
+                            st.markdown('<div style="height:100px; background-color:#f8fafc; display:flex; align-items:center; justify-content:center; border-radius:6px; border:1px dashed #cbd5e1; font-size:0.85rem; color:#000000; text-align:center; padding:5px;">Structure Pending API Window</div>', unsafe_allow_html=True)
                     
                     with data_col:
-                        st.markdown(f"**Name:** <span style='font-size:0.85rem; color:#000000;'>{st.session_state.active_screen_api.upper()}</span>", unsafe_allow_html=True)
-                        st.markdown(f"**Molecular Species:** <span style='font-size:0.85rem; color:#000000;'>{dp.get('chemical_class', 'N/A')}</span>", unsafe_allow_html=True)
-                        st.markdown(f"**Molecular Weight:** <span style='font-size:0.85rem; color:#000000;'>{dp.get('molecular_weight', 'N/A')}</span>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='scaled-text'><b>Name:</b> {st.session_state.active_screen_api.upper()}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='scaled-text'><b>Molecular Species:</b> {dp.get('chemical_class', 'N/A')}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='scaled-text'><b>Molecular Weight:</b> {dp.get('molecular_weight', 'N/A')}</div>", unsafe_allow_html=True)
                     
-                    st.markdown(f"<p style='margin-top:10px; font-size:0.8rem; color:#000000;'><b>Detected Functional Groups:</b> {', '.join(dp.get('key_functional_groups', []))}</p>", unsafe_allow_html=True)
+                    st.markdown(f"<p class='scaled-text' style='margin-top:10px;'><b>Detected Functional Groups:</b> {', '.join(dp.get('key_functional_groups', []))}</p>", unsafe_allow_html=True)
 
             with col_excipient:
                 st.markdown('<div class="section-header">Excipient Profile</div>', unsafe_allow_html=True)
@@ -311,30 +322,30 @@ def show_drug_excipient_compatibility():
                     ep = data.get("excipient_profile", {})
                     primary_excipient = selected_excipients[0] if selected_excipients else "No Excipient Selected"
                     
-                    st.markdown(f"**Excipient:** <span style='float:right; font-size:0.85rem; font-weight:600; color:#000000;'>{primary_excipient}</span>", unsafe_allow_html=True)
-                    st.markdown(f"**Excipient CAS:** <span style='float:right; font-size:0.85rem; color:#000000;'>{ep.get('cas_number', 'N/A')}</span>", unsafe_allow_html=True)
-                    st.markdown(f"**Excipient Formula:** <span style='float:right; font-size:0.85rem; color:#000000;'>{ep.get('formula', 'N/A')}</span>", unsafe_allow_html=True)
-                    st.markdown(f"**Excipient Synonyms:** <span style='display:block; font-size:0.8rem; color:#000000; text-align:right; margin-top:2px;'>{ep.get('synonyms', 'N/A')}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='scaled-text'><b>Excipient:</b> <span style='float:right; font-weight:600;'>{primary_excipient}</span></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='scaled-text'><b>Excipient CAS:</b> <span style='float:right;'>{ep.get('cas_number', 'N/A')}</span></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='scaled-text'><b>Excipient Formula:</b> <span style='float:right;'>{ep.get('formula', 'N/A')}</span></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='scaled-text' style='text-align:right; margin-top:2px;'><b>Synonyms:</b> {ep.get('synonyms', 'N/A')}</div>", unsafe_allow_html=True)
                     
                     st.markdown("<hr style='margin:8px 0;'>", unsafe_allow_html=True)
-                    st.markdown(f"**Category:** <span style='float:right; font-size:0.85rem; color:#059669; font-weight:600;'>{ep.get('category', 'Formulation Agent')}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='scaled-text'><b>Category:</b> <span style='float:right; color:#059669; font-weight:600;'>{ep.get('category', 'Formulation Agent')}</span></div>", unsafe_allow_html=True)
 
             st.markdown('<div class="section-header">Risk Levels</div>', unsafe_allow_html=True)
             
             risk_level = data.get("recommended_risk", "Low")
             if risk_level == "High":
-                risk_badge = '<span style="background-color:#fef2f2; color:#dc2626; padding:4px 12px; border-radius:20px; font-weight:700; font-size:0.85rem; border:1px solid #fecaca;">High risk</span>'
+                risk_badge = '<span style="background-color:#fef2f2; color:#dc2626; padding:4px 12px; border-radius:20px; font-weight:700; font-size:0.95rem; border:1px solid #fecaca;">High risk</span>'
             elif risk_level == "Medium":
-                risk_badge = '<span style="background-color:#fffbeb; color:#d97706; padding:4px 12px; border-radius:20px; font-weight:700; font-size:0.85rem; border:1px solid #fef3c7;">Medium risk</span>'
+                risk_badge = '<span style="background-color:#fffbeb; color:#d97706; padding:4px 12px; border-radius:20px; font-weight:700; font-size:0.95rem; border:1px solid #fef3c7;">Medium risk</span>'
             else:
-                risk_badge = '<span style="background-color:#f0fdf4; color:#16a34a; padding:4px 12px; border-radius:20px; font-weight:700; font-size:0.85rem; border:1px solid #bbf7d0;">Low risk</span>'
+                risk_badge = '<span style="background-color:#f0fdf4; color:#16a34a; padding:4px 12px; border-radius:20px; font-weight:700; font-size:0.95rem; border:1px solid #bbf7d0;">Low risk</span>'
             
             with st.container(border=True):
                 r_c1, r_c2 = st.columns(2)
                 with r_c1:
-                    st.markdown(f"**Identified risk:** &nbsp; {risk_badge}", unsafe_allow_html=True)
+                    st.markdown(f"<div class='scaled-text'><b>Identified risk:</b> &nbsp; {risk_badge}</div>", unsafe_allow_html=True)
                 with r_c2:
-                    st.markdown(f"**Rule-based risk:** &nbsp; {risk_badge}", unsafe_allow_html=True)
+                    st.markdown(f"<div class='scaled-text'><b>Rule-based risk:</b> &nbsp; {risk_badge}</div>", unsafe_allow_html=True)
 
         # --- TAB 2: IDENTIFIED EVIDENCE ---
         with tab_evidence:
@@ -346,15 +357,15 @@ def show_drug_excipient_compatibility():
                 for ev in evidence_list:
                     comp_status = ev.get('compatibility', 'Stable')
                     if 'stable' in comp_status.lower():
-                        badge = '<span style="background-color:#f0fdf4; color:#16a34a; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:600;">Stable / No Interaction</span>'
+                        badge = '<span style="background-color:#f0fdf4; color:#16a34a; padding:2px 8px; border-radius:12px; font-size:0.85rem; font-weight:600;">Stable / No Interaction</span>'
                     else:
-                        badge = '<span style="background-color:#fef2f2; color:#dc2626; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:600;">Interaction Detected</span>'
+                        badge = '<span style="background-color:#fef2f2; color:#dc2626; padding:2px 8px; border-radius:12px; font-size:0.85rem; font-weight:600;">Interaction Detected</span>'
                         
                     table_rows.append({
                         "STUDY TYPE": f"<b>{ev.get('study_type', 'N/A')}</b>",
                         "COMPATIBILITY": badge,
-                        "SOURCE REFERENCE": f"<span style='color:#000000; font-size:0.8rem;'>{ev.get('source', 'N/A')}</span>",
-                        "SCIENTIFIC DETAILS": f"<span style='color:#000000; font-size:0.8rem;'>{ev.get('details', 'N/A')}</span>"
+                        "SOURCE REFERENCE": f"{ev.get('source', 'N/A')}",
+                        "SCIENTIFIC DETAILS": f"{ev.get('details', 'N/A')}"
                     })
                 
                 df = pd.DataFrame(table_rows)
@@ -366,8 +377,8 @@ def show_drug_excipient_compatibility():
                 st.markdown('<div class="section-header" style="margin-top:25px;">Verifiable Literature Database References (PubMed)</div>', unsafe_allow_html=True)
                 for item in pubmed_data:
                     with st.container(border=True):
-                        st.markdown(f"📄 **Title:** <a href='{item['url']}' target='_blank' style='font-weight:600; color:#0284c7; text-decoration:none;'>{item['title']}</a>", unsafe_allow_html=True)
-                        st.markdown(f"<span style='font-size:0.8rem; color:#000000;'><b>Journal:</b> {item['source']} ({item['pubdate']})</span>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='scaled-text'>📄 <b>Title:</b> <a href='{item['url']}' target='_blank' style='font-weight:600; color:#0284c7; text-decoration:none;'>{item['title']}</a></div>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='scaled-text' style='margin-top:2px;'><b>Journal:</b> {item['source']} ({item['pubdate']})</div>", unsafe_allow_html=True)
 
         # --- TAB 3: RULE-BASED EVIDENCE ---
         with tab_rules:
@@ -383,7 +394,7 @@ def show_drug_excipient_compatibility():
                         "GROUP FORMULA": f"<code>{rule.get('formula', 'N/A')}</code>",
                         "EXCIPIENT RISK GROUP": f"<b>{rule.get('excipient_group', 'N/A')}</b>",
                         "REACTION TYPE": rx_type,
-                        "INTERACTION DESCRIPTION": f"<span style='color:#000000; font-size:0.8rem;'>{rule.get('description', 'N/A')}</span>"
+                        "INTERACTION DESCRIPTION": f"{rule.get('description', 'N/A')}"
                     })
                 
                 df_rules = pd.DataFrame(rule_rows)
@@ -394,7 +405,7 @@ def show_drug_excipient_compatibility():
         if not trigger_prediction:
             st.markdown(
                 """
-                <div style="text-align: center; padding: 6rem 2rem; color: #000000; border: 2px dashed #e2e8f0; border-radius: 8px;">
+                <div style="text-align: center; padding: 8rem 2rem; color: #000000; border: 2px dashed #e2e8f0; border-radius: 8px; font-size: 1.1rem;">
                     <strong>Awaiting Data Validation...</strong><br>
                     Execute an analytical query stream above to compile report arrays.
                 </div>
