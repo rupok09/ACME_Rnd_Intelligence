@@ -265,7 +265,10 @@ def show_drug_excipient_compatibility():
                 
                 response = model.generate_content(
                     analysis_prompt,
-                    generation_config={"response_mime_type": "application/json"}
+                    generation_config={
+                        "response_mime_type": "application/json",
+                        "temperature": 0.0
+                    }
                 )
                 
                 st.session_state.compat_structured_results = json.loads(response.text)
@@ -345,12 +348,11 @@ def show_drug_excipient_compatibility():
                 with r_c2:
                     st.markdown(f"<div class='scaled-text'><b>Rule-based risk:</b> &nbsp; {risk_badge}</div>", unsafe_allow_html=True)
 
-        # --- TAB 2: IDENTIFIED EVIDENCE (SURFACING VERIFIED LIT PACKAGES) ---
+        # --- TAB 2: IDENTIFIED EVIDENCE ---
         with tab_evidence:
             st.markdown('<div class="section-header">Identified Evidence</div>', unsafe_allow_html=True)
             evidence_list = data.get("identified_evidence", [])
             
-            # Merge predictive profiles with our true verified PubMed query array matches
             compiled_table_rows = []
             
             if evidence_list:
