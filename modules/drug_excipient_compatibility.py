@@ -12,7 +12,7 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 
 # ==========================================================================
-# INLINED UTILITY CORE MECHANICS (FORMERLY COMPATIBILITY_HELPERS.PY)
+# INLINED UTILITY CORE MECHANICS
 # ==========================================================================
 def apply_compatibility_theme():
     """Injects high-contrast enterprise styling blocks matching unified application standards."""
@@ -39,33 +39,17 @@ def apply_compatibility_theme():
             line-height: 1.5;
         }
         
-        /* Direct Risk Badging */
-        .risk-high {
-            color: #ef4444;
-            background-color: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            padding: 4px 8px;
-            border-radius: 6px;
+        /* Custom Clean Layout Headers matching Vercel UI */
+        .section-header {
+            color: #475569;
+            font-size: 0.85rem;
             font-weight: 700;
-            font-size: 0.8rem;
-        }
-        .risk-medium {
-            color: #f59e0b;
-            background-color: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 0.8rem;
-        }
-        .risk-low {
-            color: #10b981;
-            background-color: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 15px;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.25rem;
         }
         </style>
         """,
@@ -106,7 +90,7 @@ def render_molecule_svg(smiles):
     try:
         mol = Chem.MolFromSmiles(smiles)
         if mol:
-            drawer = Draw.MolDraw2DSVG(300, 200)
+            drawer = Draw.MolDraw2DSVG(240, 160)
             drawer.DrawMolecule(mol)
             drawer.FinishDrawing()
             return drawer.GetDrawingText()
@@ -140,18 +124,17 @@ def show_drug_excipient_compatibility():
     genai.configure(api_key=api_key)
 
     # --------------------------------------------------------------------------
-    # CORE INTERFACE FORM LAYOUT
+    # 1. SCREENING PARAMETERS (TOP SECTION)
     # --------------------------------------------------------------------------
-    panel_left, panel_right = st.columns([2, 3])
-
-    with panel_left:
-        st.markdown("### 🎛️ SCREENING PARAMETERS")
-        
-        with st.container(border=True):
+    st.markdown("### 🎛️ SCREENING PARAMETERS")
+    
+    with st.container(border=True):
+        col_param1, col_param2 = st.columns(2)
+        with col_param1:
             target_api = st.text_input("Active Pharmaceutical Ingredient (API)", placeholder="e.g., Clopidogrel Bisulfate, Aspirin")
-            
+        
+        with col_param2:
             comprehensive_excipients = [
-                # --- Diluents / Fillers ---
                 "Microcrystalline Cellulose (MCC) PH-101",
                 "Microcrystalline Cellulose (MCC) PH-102",
                 "Lactose Monohydrate (Fine Powder)",
@@ -163,23 +146,17 @@ def show_drug_excipient_compatibility():
                 "Isomalt",
                 "Sorbitol",
                 "Sucrose",
-                
-                # --- Binders ---
                 "Povidone K30 (PVP K30)",
                 "Povidone K90 (PVP K90)",
                 "Copovidone (VA64)",
                 "Hydroxypropyl Cellulose (HPC-LF)",
                 "Hydroxypropyl Methylcellulose (HPMC E5)",
                 "Pregelatinized Starch (Starch 1500)",
-                
-                # --- Disintegrants ---
                 "Crosspovidone (Polyplasdone XL)",
                 "Sodium Starch Glycolate (Primojel)",
                 "Croscarmellose Sodium (Ac-Di-Sol)",
                 "Low-Substituted Hydroxypropyl Cellulose (L-HPC)",
                 "Corn Starch",
-                
-                # --- Lubricants / Glidants ---
                 "Magnesium Stearate (Vegetable Grade)",
                 "Stearic Acid",
                 "Sodium Stearyl Fumarate (PRUV)",
@@ -187,8 +164,6 @@ def show_drug_excipient_compatibility():
                 "Colloidal Silicon Dioxide (Aerosil 200)",
                 "Hydrogenated Vegetable Oil",
                 "Glyceryl Behenate",
-                
-                # --- Polymers / Coating Agents / Functional Matrix ---
                 "Hydroxypropyl Methylcellulose (HPMC K100M CR)",
                 "Hydroxypropyl Methylcellulose (HPMC K4M CR)",
                 "Ethylcellulose",
@@ -196,8 +171,6 @@ def show_drug_excipient_compatibility():
                 "Eudragit S100",
                 "Eudragit RL/RS PO",
                 "Polyethylene Oxide (PEO)",
-                
-                # --- Surfactants / Solubilizers / Miscellaneous ---
                 "Sodium Lauryl Sulfate (SLS)",
                 "Poloxamer 407",
                 "Polysorbate 80 (Tween 80)",
@@ -205,179 +178,175 @@ def show_drug_excipient_compatibility():
                 "Sodium Bicarbonate",
                 "Calcium Carbonate"
             ]
+            selected_excipients = st.multiselect("Select Excipients to Screen", options=comprehensive_excipients)
             
-            selected_excipients = st.multiselect(
-                "Select Excipients to Screen",
-                options=comprehensive_excipients,
-            )
-            
-            expanded_dosage_forms = [
-                "Immediate-Release Tablet (Film-Coated)",
-                "Immediate-Release Tablet (Uncoated)",
-                "Hard Gelatin Capsule",
-                "Hydroxymethylcellulose (HPMC) Capsule",
-                "Sustained-Release Hydrophilic Matrix Tablet",
-                "Extended-Release Lipophilic Matrix Tablet",
-                "Enteric-Coated (Delayed-Release) Tablet",
-                "Enteric-Coated Pellet Capsule",
-                "Orodispersible Tablet (ODT)",
-                "Chewable Tablet",
-                "Effervescent Tablet",
-                "Bilayer Tablet (Fixed-Dose Combination)",
-                "Mini-Tablets in Capsule"
-            ]
-            
-            dosage_form = st.selectbox("Intended Dosage Form", options=expanded_dosage_forms)
-            
-            st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
-            trigger_prediction = st.button("Run Compatibility Screening Profile", use_container_width=True, type="primary")
+        trigger_prediction = st.button("Run Compatibility Screening Profile", use_container_width=True, type="primary")
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
     # --------------------------------------------------------------------------
-    # RIGHT SIDE: ADVANCED REPORT VIEWER STAGE (WITH EXPLICIT 429 HANDLING)
+    # 2. COMPUTATIONAL ANALYSIS RESULTS (FULL WIDTH BOTTOM SECTION)
     # --------------------------------------------------------------------------
-    with panel_right:
-        st.markdown("### 🔬 COMPUTATIONAL ANALYSIS RESULTS")
+    st.markdown("### 🔬 COMPUTATIONAL ANALYSIS RESULTS")
+    
+    if trigger_prediction:
+        if not target_api.strip():
+            st.warning("⚠️ Please provide a valid Active Pharmaceutical Ingredient (API) target identity name.")
+            return
         
-        if trigger_prediction:
-            if not target_api.strip():
-                st.warning("⚠️ Please provide a valid Active Pharmaceutical Ingredient (API) target identity name.")
-                return
+        with st.spinner("Executing structural functional-group mechanistic queries..."):
+            try:
+                smiles = get_smiles_from_pubchem(target_api)
+                molecule_svg = render_molecule_svg(smiles) if smiles else None
+                
+                model = genai.GenerativeModel("gemini-2.5-flash")
+                analysis_prompt = (
+                    f"You are an advanced computational chemistry platform specializing in pharmaceutical formulation risk assessment.\n"
+                    f"Analyze the combination of API: '{target_api}' and Excipients: {selected_excipients}.\n\n"
+                    f"Generate your output as a single valid JSON object containing exactly these keys:\n"
+                    f"1. 'drug_profile': {{ 'chemical_class': '...', 'molecular_weight': '...', 'key_functional_groups': ['...'] }}\n"
+                    f"2. 'recommended_risk': 'High' or 'Medium' or 'Low'\n"
+                    f"3. 'excipient_profile': {{ 'cas_number': '...', 'formula': '...', 'synonyms': '...', 'category': '...' }}\n"
+                    f"4. 'identified_evidence': An array of objects matching literary assays: [{{ 'study_type': '...', 'compatibility': '...', 'source': '...', 'details': '...' }}]\n"
+                    f"5. 'rule_based_evidence': An array of objects detailing functional liabilities: [{{ 'drug_group': '...', 'formula': '...', 'excipient_group': '...', 'reaction_type': '...', 'description': '...' }}]\n\n"
+                    f"CRITICAL RULES: Text details should contain full complete evidence lines sentences. Do NOT include HTML markdown tags."
+                )
+                
+                response = model.generate_content(
+                    analysis_prompt,
+                    generation_config={"response_mime_type": "application/json"}
+                )
+                
+                st.session_state.compat_structured_results = json.loads(response.text)
+                st.session_state.active_screen_api = target_api
+                st.session_state.active_molecule_svg = molecule_svg
+                
+            except Exception as err:
+                err_msg = str(err)
+                if "429" in err_msg or "quota" in err_msg.lower():
+                    st.error("⚠️ **API Rate Limit Exceeded (Error 429)**: The workspace is experiencing high request volume. Please wait roughly 30–60 seconds before executing your next analytical run.")
+                else:
+                    st.error(f"Inference Engine Failed: {err_msg}")
+
+    if "compat_structured_results" in st.session_state and st.session_state.get("compat_structured_results"):
+        data = st.session_state.compat_structured_results
+        svg_data = st.session_state.get("active_molecule_svg", None)
+        
+        tab_info, tab_evidence, tab_rules = st.tabs([
+            "Formulation information", 
+            "Identified evidence", 
+            "Rule-based evidence"
+        ])
+        
+        # --- TAB 1: FORMULATION INFORMATION ---
+        with tab_info:
+            col_drug, col_excipient = st.columns(2)
             
-            with st.spinner("Executing structural functional-group mechanistic queries..."):
-                try:
-                    smiles = get_smiles_from_pubchem(target_api)
-                    molecule_svg = render_molecule_svg(smiles) if smiles else None
+            with col_drug:
+                st.markdown('<div class="section-header">Drug Profile</div>', unsafe_allow_html=True)
+                with st.container(border=True):
+                    dp = data.get("drug_profile", {})
                     
-                    model = genai.GenerativeModel("gemini-2.5-flash")
-                    analysis_prompt = (
-                        f"You are an advanced computational chemistry platform specializing in pharmaceutical formulation risk assessment.\n"
-                        f"Analyze the combination of API: '{target_api}' and Excipients: {selected_excipients} for a '{dosage_form}' configuration.\n\n"
-                        f"Generate your output as a single valid JSON object containing exactly these keys:\n"
-                        f"1. 'drug_profile': {{ 'chemical_class': '...', 'molecular_weight': '...', 'key_functional_groups': ['...'] }}\n"
-                        f"2. 'recommended_risk': 'High' or 'Medium' or 'Low'\n"
-                        f"3. 'identified_evidence': An array of objects, each with: [{{ 'drug_name': '...', 'excipient_name': '...', 'reaction_type': '...', 'details': '...' }}]\n"
-                        f"4. 'rule_based_evidence': An array of objects detailing functional liabilities: "
-                        f"[{{ 'drug_risk_group': '...', 'drug_group_formula': '...', 'excipient_risk_group': '...', 'reaction_type': '...', 'interaction_description': '...' }}]\n\n"
-                        f"CRITICAL RULES: Do NOT output HTML code like <span> tags inside any text field. Return raw, clean text titles only."
-                    )
+                    img_col, data_col = st.columns([2, 3])
+                    with img_col:
+                        if svg_data:
+                            st.markdown(f'<div style="text-align:center; background-color:white; padding:5px; border-radius:6px; border:1px solid #e2e8f0;">{svg_data}</div>', unsafe_allow_html=True)
+                        else:
+                            st.markdown('<div style="height:100px; background-color:#f8fafc; display:flex; align-items:center; justify-content:center; border-radius:6px; border:1px dashed #cbd5e1; font-size:0.75rem; color:#64748b; text-align:center; padding:5px;">Structure Pending API Window</div>', unsafe_allow_html=True)
                     
-                    response = model.generate_content(
-                        analysis_prompt,
-                        generation_config={"response_mime_type": "application/json"}
-                    )
+                    with data_col:
+                        st.markdown(f"**Name:** <span style='font-size:0.85rem; color:#1e293b;'>{st.session_state.active_screen_api.upper()}</span>", unsafe_allow_html=True)
+                        st.markdown(f"**Molecular Species:** <span style='font-size:0.85rem; color:#64748b;'>{dp.get('chemical_class', 'N/A')}</span>", unsafe_allow_html=True)
+                        st.markdown(f"**Molecular Weight:** <span style='font-size:0.85rem; color:#64748b;'>{dp.get('molecular_weight', 'N/A')}</span>", unsafe_allow_html=True)
                     
-                    st.session_state.compat_structured_results = json.loads(response.text)
-                    st.session_state.active_screen_api = target_api
-                    st.session_state.active_molecule_svg = molecule_svg
+                    st.markdown(f"<p style='margin-top:10px; font-size:0.8rem; color:#475569;'><b>Detected Functional Groups:</b> {', '.join(dp.get('key_functional_groups', []))}</p>", unsafe_allow_html=True)
+
+            with col_excipient:
+                st.markdown('<div class="section-header">Excipient Profile</div>', unsafe_allow_html=True)
+                with st.container(border=True):
+                    ep = data.get("excipient_profile", {})
+                    primary_excipient = selected_excipients[0] if selected_excipients else "No Excipient Selected"
                     
-                except Exception as err:
-                    err_msg = str(err)
-                    if "429" in err_msg or "quota" in err_msg.lower():
-                        st.error("⚠️ **API Rate Limit Exceeded (Error 429)**: The workspace is experiencing high request volume. Please wait roughly 30–60 seconds before executing your next analytical run.")
+                    st.markdown(f"**Excipient:** <span style='float:right; font-size:0.85rem; font-weight:600;'>{primary_excipient}</span>", unsafe_allow_html=True)
+                    st.markdown(f"**Excipient CAS:** <span style='float:right; font-size:0.85rem; color:#64748b;'>{ep.get('cas_number', 'N/A')}</span>", unsafe_allow_html=True)
+                    st.markdown(f"**Excipient Formula:** <span style='float:right; font-size:0.85rem; color:#64748b;'>{ep.get('formula', 'N/A')}</span>", unsafe_allow_html=True)
+                    st.markdown(f"**Excipient Synonyms:** <span style='display:block; font-size:0.8rem; color:#64748b; text-align:right; margin-top:2px;'>{ep.get('synonyms', 'N/A')}</span>", unsafe_allow_html=True)
+                    
+                    st.markdown("<hr style='margin:8px 0;'>", unsafe_allow_html=True)
+                    st.markdown(f"**Category:** <span style='float:right; font-size:0.85rem; color:#059669; font-weight:600;'>{ep.get('category', 'Formulation Agent')}</span>", unsafe_allow_html=True)
+
+            st.markdown('<div class="section-header">Risk Levels</div>', unsafe_allow_html=True)
+            
+            risk_level = data.get("recommended_risk", "Low")
+            if risk_level == "High":
+                risk_badge = '<span style="background-color:#fef2f2; color:#dc2626; padding:4px 12px; border-radius:20px; font-weight:700; font-size:0.85rem; border:1px solid #fecaca;">High risk</span>'
+            elif risk_level == "Medium":
+                risk_badge = '<span style="background-color:#fffbeb; color:#d97706; padding:4px 12px; border-radius:20px; font-weight:700; font-size:0.85rem; border:1px solid #fef3c7;">Medium risk</span>'
+            else:
+                risk_badge = '<span style="background-color:#f0fdf4; color:#16a34a; padding:4px 12px; border-radius:20px; font-weight:700; font-size:0.85rem; border:1px solid #bbf7d0;">Low risk</span>'
+            
+            with st.container(border=True):
+                r_c1, r_c2 = st.columns(2)
+                with r_c1:
+                    st.markdown(f"**Identified risk:** &nbsp; {risk_badge}", unsafe_allow_html=True)
+                with r_c2:
+                    st.markdown(f"**Rule-based risk:** &nbsp; {risk_badge}", unsafe_allow_html=True)
+
+        # --- TAB 2: IDENTIFIED EVIDENCE ---
+        with tab_evidence:
+            st.markdown('<div class="section-header">Identified Evidence</div>', unsafe_allow_html=True)
+            evidence_list = data.get("identified_evidence", [])
+            
+            if evidence_list:
+                table_rows = []
+                for ev in evidence_list:
+                    comp_status = ev.get('compatibility', 'Stable')
+                    if 'stable' in comp_status.lower():
+                        badge = '<span style="background-color:#f0fdf4; color:#16a34a; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:600;">Stable / No Interaction</span>'
                     else:
-                        st.error(f"Inference Engine Failed: {err_msg}")
-
-        # Render layout sections if session cache memory is populated
-        if "compat_structured_results" in st.session_state and st.session_state.get("compat_structured_results"):
-            data = st.session_state.compat_structured_results
-            svg_data = st.session_state.get("active_molecule_svg", None)
-            
-            tab_info, tab_evidence, tab_rules = st.tabs([
-                "📄 Formulation Information", 
-                "🔗 Identified Evidence", 
-                "📋 Rule-Based Evidence"
-            ])
-            
-            # --- TAB 1: FORMULATION INFORMATION ---
-            with tab_info:
-                st.markdown("#### 💊 Target Profiling Components")
-                prof_col1, prof_col2 = st.columns([4, 3])
-                
-                with prof_col1:
-                    with st.container(border=True):
-                        st.markdown("**Drug Profile Summary**")
-                        dp = data.get("drug_profile", {})
+                        badge = '<span style="background-color:#fef2f2; color:#dc2626; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:600;">Interaction Detected</span>'
                         
-                        text_side, img_side = st.columns([3, 2])
-                        with text_side:
-                            st.markdown(f"**Name:** `{st.session_state.active_screen_api.upper()}`")
-                            st.markdown(f"**Species/Class:**\n{dp.get('chemical_class', 'N/A')}")
-                            st.markdown(f"**Molecular Weight:**\n{dp.get('molecular_weight', 'N/A')}")
-                        
-                        with img_side:
-                            if svg_data:
-                                st.markdown(f'<div style="text-align:center; background-color:white; padding:5px; border-radius:4px;">{svg_data}</div>', unsafe_allow_html=True)
-                            else:
-                                st.caption("⚠️ Structure match pending next successful API tracking window.")
-                                
-                        st.markdown(f"**Detected Groups:** {', '.join(dp.get('key_functional_groups', []))}")
+                    table_rows.append({
+                        "STUDY TYPE": f"<b>{ev.get('study_type', 'N/A')}</b>",
+                        "COMPATIBILITY": badge,
+                        "SOURCE REFERENCE": f"<span style='color:#475569; font-size:0.8rem;'>{ev.get('source', 'N/A')}</span>",
+                        "SCIENTIFIC DETAILS": f"<span style='color:#334155; font-size:0.8rem;'>{ev.get('details', 'N/A')}</span>"
+                    })
                 
-                with prof_col2:
-                    with st.container(border=True):
-                        st.markdown("**Selected Blend Profile**")
-                        st.markdown(f"**Dosage Form Layout:** {dosage_form}")
-                        st.markdown("**Excipient Roster:**")
-                        for ex in selected_excipients:
-                            st.markdown(f"- <span style='font-size:0.85rem;'>{ex}</span>", unsafe_allow_html=True)
-                
-                st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
-                
-                risk_level = data.get("recommended_risk", "Low")
-                if risk_level == "High":
-                    badge_style = "background-color: #fef2f2; border: 1px solid #fecaca; color: #dc2626;"
-                elif risk_level == "Medium":
-                    badge_style = "background-color: #fffbeb; border: 1px solid #fef3c7; color: #d97706;"
-                else:
-                    badge_style = "background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a;"
-                    
-                st.markdown(
-                    f"""
-                    <div style="padding: 1rem; border-radius: 8px; {badge_style} font-weight: 700; text-align: center; font-size: 1.1rem;">
-                        ⚠️ OVERALL RECOMMENDED MATRIX RISK: {risk_level.upper()} RISK
-                    </div>
-                    """, 
-                    unsafe_allow_html=True
-                )
+                df = pd.DataFrame(table_rows)
+                st.write(df.to_html(escape=False, index=False), unsafe_allow_html=True)
+            else:
+                st.info("No explicit binary literature exceptions matched against active criteria records.")
 
-            # --- TAB 2: IDENTIFIED EVIDENCE ---
-            with tab_evidence:
-                st.markdown("#### 🔗 Direct Binary Interaction Cross-References")
-                evidence_list = data.get("identified_evidence", [])
-                if evidence_list:
-                    for ev in evidence_list:
-                        with st.container(border=True):
-                            ev_left, ev_right = st.columns([1, 2])
-                            with ev_left:
-                                st.markdown(f"🧪 **Excipient:** `{ev.get('excipient_name', 'N/A')}`")
-                                st.markdown(f"💥 **Reaction:** <span style='color:#dc2626; font-weight:600;'>{ev.get('reaction_type', 'N/A')}</span>", unsafe_allow_html=True)
-                            with ev_right:
-                                st.markdown(f"📝 **Evidence Mapping & Details:**\n<span style='font-size:0.88rem; color:#334155;'>{ev.get('details', 'N/A')}</span>", unsafe_allow_html=True)
-                else:
-                    st.info("No explicit binary literature exceptions matched against active criteria records.")
-
-            # --- TAB 3: RULE-BASED EVIDENCE ---
-            with tab_rules:
-                st.markdown("#### 📋 Structural Group Mechanistic Rule Checks")
-                rules_list = data.get("rule_based_evidence", [])
+        # --- TAB 3: RULE-BASED EVIDENCE ---
+        with tab_rules:
+            st.markdown('<div class="section-header">Rule-Based Evidence</div>', unsafe_allow_html=True)
+            rules_list = data.get("rule_based_evidence", [])
+            
+            if rules_list:
+                rule_rows = []
                 for rule in rules_list:
-                    with st.container(border=True):
-                        r_col1, r_col2 = st.columns([1, 2])
-                        with r_col1:
-                            st.markdown(f"🧬 **Drug Group:** `{rule.get('drug_risk_group', 'N/A')}`")
-                            st.markdown(f"🧪 **Formula:** `{rule.get('drug_group_formula', 'N/A')}`")
-                            st.markdown(f"🧱 **Excipient Variable:** `{rule.get('excipient_risk_group', 'N/A')}`")
-                        with r_col2:
-                            st.markdown(f"💥 **Reaction Type:** <span style='color:#b91c1c; font-weight:600; background-color:#fef2f2; padding:4px 8px; border-radius:4px;'>{rule.get('reaction_type', 'N/A')}</span>", unsafe_allow_html=True)
-                            st.markdown(f"<div style='margin-top:8px;'></div>", unsafe_allow_html=True)
-                            st.markdown(f"📝 **Interaction Description:**\n<span style='font-size:0.88rem; color:#334155; line-height:1.5;'>{rule.get('interaction_description', 'N/A')}</span>", unsafe_allow_html=True)
-        else:
-            if not trigger_prediction:
-                st.markdown(
-                    """
-                    <div style="text-align: center; padding: 8rem 2rem; color: #64748b; border: 2px dashed #e2e8f0; border-radius: 8px;">
-                        <strong>Awaiting Data Validation...</strong><br>
-                        Execute an analytical query stream above to compile report arrays.
-                    </div>
-                    """, 
-                    unsafe_allow_html=True
-                )
+                    rx_type = f"<span style='color:#b91c1c; font-weight:600;'>{rule.get('reaction_type', 'N/A')}</span>"
+                    rule_rows.append({
+                        "DRUG RISK GROUP": f"<b>{rule.get('drug_group', 'N/A')}</b>",
+                        "GROUP FORMULA": f"<code>{rule.get('formula', 'N/A')}</code>",
+                        "EXCIPIENT RISK GROUP": f"<b>{rule.get('excipient_group', 'N/A')}</b>",
+                        "REACTION TYPE": rx_type,
+                        "INTERACTION DESCRIPTION": f"<span style='color:#334155; font-size:0.8rem;'>{rule.get('description', 'N/A')}</span>"
+                    })
+                
+                df_rules = pd.DataFrame(rule_rows)
+                st.write(df_rules.to_html(escape=False, index=False), unsafe_allow_html=True)
+            else:
+                st.info("No mechanical functional-group liabilities flagged for this formulation composition matrix.")
+    else:
+        if not trigger_prediction:
+            st.markdown(
+                """
+                <div style="text-align: center; padding: 6rem 2rem; color: #64748b; border: 2px dashed #e2e8f0; border-radius: 8px;">
+                    <strong>Awaiting Data Validation...</strong><br>
+                    Execute an analytical query stream above to compile report arrays.
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
