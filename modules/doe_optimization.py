@@ -2,7 +2,7 @@ import streamlit as st
 
 
 def show_doe_optimization():
-    st.title("📊 DOE Optimization")
+    st.title("DOE Optimization")
 
     st.info("This module is under development.")
 

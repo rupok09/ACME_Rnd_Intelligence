@@ -140,13 +140,10 @@ def execute_local_text_mining_fallback(text, file_names):
 def show_literature_intelligence():
     apply_literature_theme()
 
-    # --------------------------------------------------------------------------
-    # COMPONENT HEADER BANNER INTERFACE
-    # --------------------------------------------------------------------------
     st.markdown(
         """
         <div class="lit-banner">
-            <div class="lit-title">🧪 Literature Reviewer</div>
+            <div class="lit-title">Literature Reviewer</div>
             <div class="lit-subtitle">
                 Extract hidden R&D insights across multiple raw research publications using advanced structured mining
                 with direct compliance text-evidence trails.
@@ -156,26 +153,12 @@ def show_literature_intelligence():
         unsafe_allow_html=True
     )
 
-    # --------------------------------------------------------------------------
-    # REVISED RESOLUTION GATEWAY & MULTI-KEY ONBOARDING WIZARD
-    # --------------------------------------------------------------------------
-    api_key = os.getenv("GEMINI_API_KEY", "")
-    if not api_key and "gemini_api_key" in st.session_state:
-        api_key = st.session_state.gemini_api_key
-
-    # Provide an on-screen workspace key switcher right inside the literature module
-    with st.expander("🔑 Multi-Key Node Management (Free Tier Quota Failover)", expanded=not bool(api_key)):
-        st.caption("Paste an alternative Google AI Studio key string below to instantly override daily 20 RPD ceilings.")
-        new_key_input = st.text_input("Active Alternative Token Register", type="password", placeholder="AIzaSy... or AQ...", key="lit_key_switcher_input")
-        if st.button("Register Key Variant", use_container_width=True):
-            if new_key_input.strip():
-                st.session_state.gemini_api_key = new_key_input.strip()
-                st.toast("New operational credential context applied!", icon="✅")
-                st.rerun()
-
-    if not api_key:
-        st.warning("Awaiting system workspace token verification to open active cloud communication channels.")
+    # FIXED: Bypassed standard workspace input block forms. Force login terminal checks.
+    if not st.session_state.get("authenticated", False):
+        st.warning("⚠️ Access Denied. Please navigate to the Login portal module tab in the sidebar navigation stack to unlock system assets.")
         return
+
+    api_key = st.session_state.gemini_api_key
 
     # --------------------------------------------------------------------------
     # SPLIT PANEL LAYOUT ENGINE: [ DOCUMENT SOURCE | REVIEW ASSISTANT ]
@@ -328,32 +311,32 @@ def show_literature_intelligence():
                         if st.button(question, key=f"chip_{idx}", use_container_width=True):
                             clicked_query = question
 
-                user_query = st.chat_input("Cross-reference or ask questions about your uploaded documents...")
-                active_input = user_query or clicked_query
-                
-                if active_input:
-                    st.session_state.chat_history_lit.append({"role": "user", "text": active_input})
-                    with st.spinner("Analyzing data tables across repositories..."):
-                        context_guided_prompt = (
-                            f"You are a helpful and precise AI collaborator assisting a pharmaceutical formulation scientist.\n"
-                            f"Answer the user's question accurately using this reference text data matrix:\n"
-                            f"{st.session_state.extracted_doc_text[:35000]}\n\n"
-                            f"User Query: {active_input}"
-                        )
-                        chat_success = False
-                        for model_variant in MODEL_HIERARCHY:
-                            try:
-                                genai.configure(api_key=api_key)
-                                model = genai.GenerativeModel(model_variant)
-                                response = model.generate_content(context_guided_prompt)
-                                st.session_state.chat_history_lit.append({"role": "assistant", "text": response.text})
-                                chat_success = True
-                                st.rerun()
-                                break
-                            except Exception:
-                                continue
-                        if not chat_success:
-                            st.error("⚠️ Token pipeline overtaxed across available models. Please paste an alternative key up top or wait for the quota window to clear.")
+            user_query = st.chat_input("Cross-reference or ask questions about your uploaded documents...")
+            active_input = user_query or clicked_query
+            
+            if active_input:
+                st.session_state.chat_history_lit.append({"role": "user", "text": active_input})
+                with st.spinner("Analyzing data tables across repositories..."):
+                    context_guided_prompt = (
+                        f"You are a helpful and precise AI collaborator assisting a pharmaceutical formulation scientist.\n"
+                        f"Answer the user's question accurately using this reference text data matrix:\n"
+                        f"{st.session_state.extracted_doc_text[:35000]}\n\n"
+                        f"User Query: {active_input}"
+                    )
+                    chat_success = False
+                    for model_variant in MODEL_HIERARCHY:
+                        try:
+                            genai.configure(api_key=api_key)
+                            model = genai.GenerativeModel(model_variant)
+                            response = model.generate_content(context_guided_prompt)
+                            st.session_state.chat_history_lit.append({"role": "assistant", "text": response.text})
+                            chat_success = True
+                            st.rerun()
+                            break
+                        except Exception:
+                            continue
+                    if not chat_success:
+                        st.error("⚠️ Token pipeline overtaxed across available models. Please paste an alternative key up top or wait for the quota window to clear.")
 
             # --- TAB 2: AUTOMATED STRUCTURED PARAMETER MATRIX ---
             with tab_matrix:
@@ -370,7 +353,6 @@ def show_literature_intelligence():
                         )
                         
                         parsed_successfully = False
-                        # Multi-model variation failover loop matching model task suitability guidelines
                         for model_variant in MODEL_HIERARCHY:
                             try:
                                 genai.configure(api_key=api_key)
@@ -385,7 +367,6 @@ def show_literature_intelligence():
                                     st.toast(f"⏳ {model_variant} limits reached. Routing processing thread to fallback layer...")
                                     continue
                         
-                        # Absolute local parsing fallback if all cloud key limits fail
                         if not parsed_successfully:
                             st.session_state.structured_matrix_data = execute_local_text_mining_fallback(st.session_state.extracted_doc_text, current_names)
                             st.session_state.lit_fallback_active = True

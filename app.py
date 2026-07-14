@@ -3,7 +3,6 @@ import streamlit as st
 # Crucial: Page configuration must be the absolute first Streamlit command executed
 st.set_page_config(
     page_title="ACME R&D Intelligence",
-    page_icon="🧪",
     layout="wide"
 )
 
@@ -100,7 +99,7 @@ with st.sidebar:
             margin-bottom: 15px;
         ">
             <h3 style="color: #f8fafc; margin: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.3px;">
-                🧪 ACME R&D Intelligence
+                ACME R&D Intelligence
             </h3>
             <p style="color: #94a3b8; font-size: 0.78rem; margin-top: 6px; margin-bottom: 0; line-height: 1.4;">
                 A modular AI platform for literature review, API characterization, RLD information, 
@@ -115,14 +114,14 @@ with st.sidebar:
     if st.button("⌂ Home", use_container_width=True, key="side_nav_home"):
         go_home()
 
-    if st.button("📚 Literature Review", use_container_width=True, key="side_nav_lit"):
-        go_to("Literature Review")
-
     if st.button("🧪 API Characterization", use_container_width=True, key="side_nav_api"):
         go_to("API Characterization")
 
     if st.button("📋 RLD Information", use_container_width=True, key="side_nav_rld"):
         go_to("RLD Information")
+    
+    if st.button("📚 Literature Review", use_container_width=True, key="side_nav_lit"):
+        go_to("Literature Review")
 
     if st.button("🧩 Drug-Excipient Compatibility", use_container_width=True, key="side_nav_compat"):
         go_to("Drug-Excipient Compatibility")
@@ -154,14 +153,14 @@ page = st.session_state.page
 if page == "Home":
     show_home()
 
-elif page == "Literature Review":
-    show_literature_intelligence()
-
 elif page == "API Characterization":
     show_api_characterization()
 
 elif page == "RLD Information":
     show_rld_information()
+
+elif page == "Literature Review":
+    show_literature_intelligence()
 
 elif page == "Drug-Excipient Compatibility":
     show_drug_excipient_compatibility()

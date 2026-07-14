@@ -2,7 +2,7 @@ import streamlit as st
 
 
 def show_preformulation_design():
-    st.title("⚗️ Preformulation Design")
+    st.title("Preformulation Design")
 
     st.info("This module is under development.")
 

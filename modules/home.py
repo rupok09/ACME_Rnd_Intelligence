@@ -97,23 +97,11 @@ def show_home():
     )
 
     # ================= ROW 1: MODULES 1, 2, 3 =================
+   # ================= ROW 1: REORDERED MODULE SECTOR =================
     col1, col2, col3 = st.columns(3)
 
+    # 1. API Characterization
     with col1:
-        st.markdown(
-            """
-            <div class="home-card">
-                <div class="home-icon green">📚</div>
-                <h3>Literature Review</h3>
-                <p>Upload downloaded PDFs, extract text, review literature, and summarize key findings.</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        if st.button("Open Literature Review", use_container_width=True, key="home_btn_lit"):
-            go_to("Literature Review")
-
-    with col2:
         st.markdown(
             """
             <div class="home-card">
@@ -127,7 +115,8 @@ def show_home():
         if st.button("Open API Characterization", use_container_width=True, key="home_btn_api"):
             go_to("API Characterization")
 
-    with col3:
+    # 2. RLD Information
+    with col2:
         st.markdown(
             """
             <div class="home-card">
@@ -140,6 +129,21 @@ def show_home():
         )
         if st.button("Open RLD Information", use_container_width=True, key="home_btn_rld"):
             go_to("RLD Information")
+
+    # 3. Literature Review
+    with col3:
+        st.markdown(
+            """
+            <div class="home-card">
+                <div class="home-icon green">📚</div>
+                <h3>Literature Review</h3>
+                <p>Upload downloaded PDFs, extract text, review literature, and summarize key findings.</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("Open Literature Review", use_container_width=True, key="home_btn_lit"):
+            go_to("Literature Review")
 
     st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
 
@@ -187,8 +191,6 @@ def show_home():
         )
         if st.button("Open DOE Optimization", use_container_width=True, key="home_btn_doe"):
             go_to("DOE Optimization")
-
-    st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
 
     st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
 

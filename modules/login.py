@@ -102,11 +102,21 @@ def show_login():
 
     # Input elements
     emp_id_input = st.text_input("Employee ID", placeholder="e.g., 41432")
-    api_key_input = st.text_input("Password (Google AI Studio API Key)", type="password", placeholder="AIzaSy... or AQ...")
+    
+    # FIXED: Split password layout block into split action gateway layout containing instructions
+    login_col1, login_col2 = st.columns([3, 2])
+    
+    with login_col1:
+        api_key_input = st.text_input("Password (API Key)", type="password", placeholder="AIzaSy... or AQ...")
+        
+    with login_col2:
+        st.markdown("<div style='margin-top: 24px;'></div>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("[🌐 Copy API Key from Google AI Studio](https://aistudio.google.com/)")
 
     st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
     
-    if st.button("Authenticate & Mount API Node", use_container_width=True):
+    if st.button("Authenticate & Log In", use_container_width=True):
         clean_emp_id = emp_id_input.strip()
         clean_api_key = api_key_input.strip()
 

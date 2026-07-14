@@ -61,47 +61,10 @@ def apply_compatibility_theme():
 
 def check_compatibility_credentials():
     """Resolves session API keys and displays the dynamic onboarding setup wizard if vacant."""
-    api_key = os.getenv("GEMINI_API_KEY", "")
-    if not api_key and "gemini_api_key" in st.session_state:
-        api_key = st.session_state.gemini_api_key
-
-    if not api_key:
-        st.markdown("### 🔒 System Workspace Verification")
-        login_col1, login_col2 = st.columns([3, 2])
-        
-        with login_col1:
-            with st.container(border=True):
-                st.markdown("**Manual Verification**")
-                st.caption("Paste your workspace passcode validation token to open communication paths.")
-                default_input_val = st.session_state.get("compat_auto_key", "")
-                user_token = st.text_input("Gemini Signature Register", type="password", placeholder="AIzaSy... or AQ...", value=default_input_val, key="compat_key_input")
-                
-                if st.button("Initialize Compatibility Node", use_container_width=True, type="primary"):
-                    token_clean = user_token.strip()
-                    if token_clean.startswith("AIzaSy") or token_clean.startswith("AQ"):
-                        st.session_state.gemini_api_key = token_clean
-                        st.toast("Compatibility prediction pipeline linked!", icon="🧩")
-                        st.rerun()
-                    else:
-                        st.error("Invalid token format mapping. Please check your AI Studio key string.")
-        
-        with login_col2:
-            with st.container(border=True):
-                st.markdown("💡 **Automated Setup Wizard**")
-                st.caption("Generate a signature map token instantly to initialize the interface framework.")
-                st.markdown("[🌐 Launch Google AI Studio Launchpad](https://aistudio.google.com/)")
-                st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
-                
-                collected_paste = st.text_input("📋 Paste copied key stream directly here:", placeholder="Ctrl + V to dump here...", key="compat_wizard_input")
-                if collected_paste:
-                    clean_token = collected_paste.strip()
-                    if "AIzaSy" in clean_token or clean_token.startswith("AQ"):
-                        st.session_state.compat_auto_key = clean_token
-                        st.session_state.gemini_api_key = clean_token
-                        st.success("⚡ Token registered successfully! Reloading frame...")
-                        st.rerun()
-                    else:
-                        st.warning("Tracking prefix missed. Verify your source clipboard maps.")
+    # FIXED: Hard check authentication profile matrix mapping first. Reject unverified connections.
+    if not st.session_state.get("authenticated", False):
+        st.warning("⚠️ Access Denied. Please navigate to the Login portal module tab in the sidebar navigation stack to unlock system assets.")
         return None
-        
+
+    api_key = st.session_state.get("gemini_api_key", "")
     return api_key

@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 from urllib.parse import quote_plus
+import requests
+import base64
 
 from utils.orange_book import (
     search_orange_book,
@@ -42,7 +44,7 @@ def make_link_table(df, link_columns):
 
 
 def show_rld_information():
-    st.title("📋 RLD Intelligence")
+    st.title("RLD Information")
 
     st.write(
         "Search FDA Orange Book, select the RLD product, then collect DailyMed label information "
@@ -50,14 +52,12 @@ def show_rld_information():
     )
 
     # ===================== STEP 1: ORANGE BOOK =====================
-    st.markdown("### Step 1: Search FDA Orange Book")
-
     api_name = st.text_input(
-        "API / Product Name",
+        label="API / Product Name",
         placeholder="e.g. Clopidogrel Bisulfate"
     )
 
-    if st.button("Search FDA Orange Book", use_container_width=True):
+    if st.button("Search RLD / RS Product", use_container_width=True):
 
         if not api_name.strip():
             st.warning("Please enter API / Product name first.")
@@ -122,8 +122,6 @@ def show_rld_information():
                 st.info("No raw Orange Book table extracted.")
 
     # ===================== STEP 2: DAILYMED =====================
-    st.markdown("---")
-    st.markdown("### Step 2: DailyMed Drug Label")
 
     selected_record = st.session_state.get("selected_orange_book_record", None)
 
@@ -141,9 +139,9 @@ def show_rld_information():
         default_query = st.session_state.get("rld_api_name", "")
 
     dailymed_query = st.text_input(
-        "DailyMed Label Search Query",
+        label="RLD / RS Name",
         value=default_query,
-        placeholder="e.g. PLAVIX or Clopidogrel Bisulfate"
+        placeholder="e.g. PLAVIX"
     )
 
     if st.button("Search DailyMed Label Info", use_container_width=True):
@@ -180,23 +178,29 @@ def show_rld_information():
         selected_label = labels[label_options.index(selected_label_text)]
         st.session_state.selected_dailymed_label = selected_label
 
-        col1, col2 = st.columns(2)
+        # FIXED: Fetch remote PDF bytes via backend stream and parse to standard base64 inline frame context
+        st.markdown("#### 📄 Drug Label Document Preview")
+        try:
+            pdf_url = selected_label["pdf_link"]
+            with st.spinner("Downloading and processing secure label preview stream..."):
+                response = requests.get(pdf_url, timeout=10)
+                if response.status_code == 200:
+                    base64_pdf = base64.b64encode(response.content).decode('utf-8')
+                    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="700" type="application/pdf"></iframe>'
+                    st.markdown(pdf_display, unsafe_allow_html=True)
+                else:
+                    st.error(f"Failed to pull content structure from portal endpoint (Status Code: {response.status_code})")
+        except Exception as preview_err:
+            st.error(f"Unable to render local base64 document frame data: {preview_err}")
+            
+        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+        st.link_button(
+            "🔗 Open Official DailyMed Label Portal Context",
+            selected_label["label_link"],
+            use_container_width=True
+        )
 
-        with col1:
-            st.link_button(
-                "Open Official DailyMed Label",
-                selected_label["label_link"],
-                use_container_width=True
-            )
-
-        with col2:
-            st.link_button(
-                "Download Drug Label PDF",
-                selected_label["pdf_link"],
-                use_container_width=True
-            )
-
-   # ===================== OUTPUTS =====================
+# ===================== OUTPUTS =====================
 
 inactive_df = st.session_state.get("inactive_df", None)
 product_char_df = st.session_state.get("product_char_df", None)
@@ -214,27 +218,3 @@ if product_char_df is not None:
 if resources_df is not None:
     st.markdown("### Resources")
     make_link_table(resources_df, ["Reference"])
-
-
-# ===================== EXPORT =====================
-
-if (
-    orange_book_df is not None
-    or inactive_df is not None
-    or product_char_df is not None
-    or resources_df is not None
-):
-    excel_file = create_rld_excel_report(
-        rld_df=orange_book_df,
-        inactive_df=inactive_df,
-        product_char_df=product_char_df,
-        resources_df=resources_df,
-    )
-
-    st.download_button(
-        label="Download RLD Intelligence Excel Report",
-        data=excel_file,
-        file_name="RLD_Intelligence_Report.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        use_container_width=True,
-    )

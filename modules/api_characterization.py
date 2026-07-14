@@ -50,22 +50,10 @@ def show_record_preview(record):
 
 
 def show_api_characterization():
-    st.title("🧪 API Characterization")
+    st.title("API Characterization")
     st.write(
         "Search API records, select matching source records, choose required properties, "
         "and generate a source-linked characterization table."
-    )
-
-    st.markdown(
-        """
-        <div class="api-card">
-            <div class="api-card-title">Step 1: Search API</div>
-            <div class="api-card-text">
-                Enter API name, salt form, CAS number, PubChem CID, or ChEMBL ID.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
     )
 
     api_name = st.text_input(
@@ -74,7 +62,7 @@ def show_api_characterization():
         key="api_search_input"
     )
 
-    if st.button("Find Matching Records", use_container_width=True):
+    if st.button("Search API", use_container_width=True):
         if not api_name.strip():
             st.warning("Please enter an API name first.")
             return
@@ -172,90 +160,3 @@ def show_api_characterization():
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             use_container_width=True
         )
-
-        # ==============================================================================
-        # RDKit INTEGRATED STRUCTURAL INTELLIGENCE
-        # ==============================================================================
-        st.markdown("---")
-        st.markdown("## 5. RDKit Structural Intelligence")
-
-        smiles = None
-
-        # 1. Primary Strategy: Agnostic Row Crawler across the compiled result DataFrame
-        if result_df is not None and not result_df.empty:
-            for index, row in result_df.iterrows():
-                row_cells = [str(val).strip() for val in row.values]
-                
-                # Check if this specific row describes a SMILES entry
-                if any("smiles" in cell.lower() for cell in row_cells):
-                    for cell in row_cells:
-                        clean_cell = cell.split("/")[0].strip()
-                        clean_cell = "".join(clean_cell.split())
-                        
-                        # Identify the string by filtering out layout metadata labels
-                        if len(clean_cell) > 10 and not any(x in clean_cell.lower() for x in ["smiles", "identity", "physicochemical", "found", "detected", "review", "missing"]):
-                            if "." in clean_cell:
-                                smiles = max(clean_cell.split("."), key=len)
-                            else:
-                                smiles = clean_cell
-                            break
-                if smiles:
-                    break
-
-        # 2. Secondary Strategy: Fallback to crawling raw session records if table parsing is skipped
-        if not smiles:
-            active_records = st.session_state.get("api_matching_records", [])
-            target_keys = ["smiles", "canonicalsmiles", "canonical_smiles"]
-            
-            for rec in active_records:
-                for raw_key, raw_val in rec.items():
-                    normalized_key = str(raw_key).lower().replace("_", "").replace(" ", "")
-                    if normalized_key in target_keys and raw_val:
-                        raw_str = str(raw_val).split("/")[0].strip()
-                        clean_str = "".join(raw_str.split())
-                        
-                        if "." in clean_str:
-                            smiles = max(clean_str.split("."), key=len)
-                        else:
-                            smiles = clean_str
-                        break
-                if smiles:
-                    break
-
-        # 3. Execution Pipeline: Feed the verified, isolated parent string to the RDKit engine
-        if smiles:
-            current_api_name = st.session_state.get('current_api', 'API Molecule')
-            with st.spinner("Running RDKit decomposition & hot-spot screening analysis..."):
-                try:
-                    rdkit_result = screen_molecule_degradation(current_api_name, smiles)
-
-                    st.subheader("Structure")
-                    
-                    # FIXED: Handle graphics visualization fallback for headless cloud servers
-                    try:
-                        if rdkit_result.get("image"):
-                            st.image(rdkit_result["image"], output_format="SVG", use_container_width=False)
-                        else:
-                            raise ValueError("No core image data vector present.")
-                    except Exception:
-                        # Fallback: Draw a beautiful text placeholder canvas using matplotlib
-                        fig, ax = plt.subplots(figsize=(6, 2), layout="constrained")
-                        ax.text(0.5, 0.5, f"Structure Enabled\nSMILES: {smiles[:35]}...", 
-                                ha='center', va='center', color='#1e293b', weight='bold', fontsize=10)
-                        ax.axis('off')
-                        fig.patch.set_facecolor('#f8fafc')
-                        st.pyplot(fig)
-                        st.caption("ℹ️ Running in Headless Server Optimization Mode. Molecular geometry structures are processed natively.")
-
-                    st.subheader("Molecular Properties")
-                    st.dataframe(rdkit_result["properties"], use_container_width=True)
-
-                    st.subheader("Functional Group Scan")
-                    st.dataframe(rdkit_result["functional_groups"], use_container_width=True)
-
-                    st.subheader("Predicted Degradation Products")
-                    st.dataframe(rdkit_result["degradants"], use_container_width=True)
-                except Exception as rdk_err:
-                    st.error(f"RDKit Structural Subsystem Failure: {rdk_err}")
-        else:
-            st.info("Structure verification note: Canonical SMILES string field not discovered in selected data lineage logs to seed RDKit automation frameworks.")

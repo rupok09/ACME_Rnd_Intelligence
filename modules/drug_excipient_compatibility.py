@@ -3,7 +3,6 @@ os.environ["RDK_BUILD_HEADLESS"] = "True"
 import matplotlib
 matplotlib.use("Agg")
 
-# Your existing imports continue below...
 import streamlit as st
 import google.generativeai as genai
 import json
@@ -52,7 +51,7 @@ def show_drug_excipient_compatibility():
     st.markdown(
         """
         <div class="compat-banner">
-            <div class="compat-title">🧩 Drug-Excipient Compatibility Platform</div>
+            <div class="compat-title">Drug-Excipient Compatibility Platform</div>
             <div class="compat-subtitle">
                 Automated binary interaction predictive modeling engine. Screen custom excipient blend matrices 
                 against active compound functional groups to predict stability and degradation risks.
@@ -139,7 +138,6 @@ def show_drug_excipient_compatibility():
             selected_excipients = st.multiselect(
                 "Select Excipients to Screen",
                 options=comprehensive_excipients,
-                default=["Microcrystalline Cellulose (MCC) PH-102", "Magnesium Stearate (Vegetable Grade)", "Lactose Monohydrate (Fine Powder)"]
             )
             
             # Expanded Solid Oral Dosage Form Options
